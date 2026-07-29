@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import SmoothScroll from "@/components/motion/SmoothScroll";
 import { Sora, Roboto } from "next/font/google";
 import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 import "./globals.css";
 
 const sora = Sora({
@@ -31,6 +32,7 @@ export default function RootLayout({
         <SmoothScroll>
           <Navbar />
           {children}
+          <Footer />
         </SmoothScroll>
       </body>
     </html>
