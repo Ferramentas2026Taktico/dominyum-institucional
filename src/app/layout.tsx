@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import SmoothScroll from "@/components/motion/SmoothScroll";
 import { Sora, Roboto } from "next/font/google";
 import "./globals.css";
 
@@ -25,7 +26,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="pt-BR" className={`${sora.variable} ${roboto.variable}`}>
-      <body>{children}</body>
+      <body>
+        <SmoothScroll>{children}</SmoothScroll>
+      </body>
     </html>
   );
 }
