@@ -2,16 +2,25 @@
 
 import { useState } from "react";
 import { useGSAP, ScrollTrigger } from "@/lib/gsap";
+import { useLenis } from "@/components/motion/SmoothScroll";
 
 const links = [
   { label: "Sistema", href: "#sistema" },
   { label: "Serviços", href: "#servicos" },
   { label: "Método", href: "#metodo" },
+  { label: "Resultados", href: "#resultados" },
   { label: "Sobre", href: "#sobre" },
 ];
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+
+  const lenis = useLenis();
+
+  const handleClick = (e: React.MouseEvent, href: string) => {
+    e.preventDefault();
+    lenis?.scrollTo(href, { offset: -80 }); // -80 compensa a altura da navbar fixa
+  };
 
   useGSAP(() => {
     // Dispara sempre que o scroll passa/volta dos 60px
@@ -35,8 +44,14 @@ export default function Navbar() {
           scrolled ? "py-4" : "py-6"
         }`}
       >
-        <a href="#" className="font-display text-xl font-semibold text-limestone">
-          Dominyum
+        <a href="#top"
+            onClick={(e) => {
+            e.preventDefault();
+            lenis?.scrollTo(0);
+            }}
+            className="font-display text-xl font-semibold text-limestone cursor-pointer"
+        >
+            Dominyum
         </a>
 
         <ul className="hidden items-center gap-8 md:flex">
@@ -44,19 +59,21 @@ export default function Navbar() {
             <li key={l.href}>
               
                 <a href={l.href}
-                className="font-sans text-sm text-limestone/70 transition-colors hover:text-sage"
-              >
+                onClick={(e) => handleClick(e, l.href)}
+                className="font-sans text-sm text-limestone/70 transition-colors hover:text-sage cursor-pointer"
+                >
                 {l.label}
-              </a>
+                </a>
             </li>
           ))}
         </ul>
 
         
           <a href="#contato"
-          className="rounded-full bg-sage px-6 py-2.5 font-sans text-sm font-medium text-carbon transition-colors hover:bg-limestone"
+            onClick={(e) => handleClick(e, "#contato")}
+        className="rounded-full bg-sage px-6 py-2.5 font-sans text-sm font-medium text-carbon transition-colors hover:bg-limestone cursor-pointer"
         >
-          Fale com a gente
+        Fale com a gente
         </a>
       </nav>
     </header>

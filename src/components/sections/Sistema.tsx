@@ -51,7 +51,7 @@ export default function Sistema() {
   );
 
   return (
-    <section ref={container} className="relative bg-slate px-6 py-32 md:px-12">
+    <section ref={container} id="sistema" className="relative bg-slate px-6 py-32 md:px-12">
       <div className="mx-auto max-w-6xl">
         <p className="mb-4 font-sans text-sm uppercase tracking-[0.2em] text-sage">
           Sistema de Domínio
