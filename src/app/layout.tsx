@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import SmoothScroll from "@/components/motion/SmoothScroll";
 import { Sora, Roboto } from "next/font/google";
+import Navbar from "@/components/layout/Navbar";
 import "./globals.css";
 
 const sora = Sora({
@@ -27,7 +28,10 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className={`${sora.variable} ${roboto.variable}`}>
       <body>
-        <SmoothScroll>{children}</SmoothScroll>
+        <SmoothScroll>
+          <Navbar />
+          {children}
+        </SmoothScroll>
       </body>
     </html>
   );
