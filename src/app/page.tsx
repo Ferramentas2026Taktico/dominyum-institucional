@@ -4,6 +4,7 @@ import Servicos from "@/components/sections/Servicos";
 import Metodo from "@/components/sections/Metodo";
 import Resultados from "@/components/sections/Resultados";
 import Sobre from "@/components/sections/Sobre";
+import Contato from "@/components/sections/Contato";
 
 export default function Home() {
   return (
@@ -14,6 +15,7 @@ export default function Home() {
       <Metodo />
       <Resultados />
       <Sobre />
+      <Contato />
     </main>
   );
 }
