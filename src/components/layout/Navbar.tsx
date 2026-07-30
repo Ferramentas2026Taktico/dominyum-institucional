@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useGSAP, ScrollTrigger } from "@/lib/gsap";
 import { useLenis } from "@/components/motion/SmoothScroll";
+import Image from "next/image";
 
 const links = [
   { label: "Sistema", href: "#sistema" },
@@ -45,13 +46,20 @@ export default function Navbar() {
         }`}
       >
         <a href="#top"
-            onClick={(e) => {
+          onClick={(e) => {
             e.preventDefault();
             lenis?.scrollTo(0);
-            }}
-            className="font-display text-xl font-semibold text-limestone cursor-pointer"
+          }}
+          className="cursor-pointer"
         >
-            Dominyum
+          <Image
+            src="/brand/Logo_Dominyum.png"
+            alt="Dominyum"
+            width={853}
+            height={152}
+            priority
+            className="h-8 w-auto"
+          />
         </a>
 
         <ul className="hidden items-center gap-8 md:flex">
