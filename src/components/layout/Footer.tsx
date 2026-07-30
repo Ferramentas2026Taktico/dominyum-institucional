@@ -2,15 +2,9 @@
 
 import { useLenis } from "@/components/motion/SmoothScroll";
 import { usePathname } from "next/navigation";
+import { navLinks } from "@/lib/nav";
 
-const navLinks = [
-  { label: "Sistema", href: "#sistema" },
-  { label: "Serviços", href: "#servicos" },
-  { label: "Método", href: "#metodo" },
-  { label: "Resultados", href: "#resultados" },
-  { label: "Sobre", href: "#sobre" },
-];
-
+// Só do footer — não vai para lib/nav.ts
 const social = [
   { label: "Instagram", href: "https://instagram.com/dominyum" },
   { label: "LinkedIn", href: "#" },
@@ -31,29 +25,12 @@ export default function Footer() {
   };
 
   return (
-    <footer className="relative bg-carbon px-6 pb-10 pt-24 md:px-12">
+    <footer className="relative bg-carbon px-6 pb-10 pt-20 md:px-12">
       <div className="mx-auto max-w-6xl">
-        {/* Chamada final + marca */}
-        <div className="flex flex-col gap-10 border-b border-limestone/10 pb-16 md:flex-row md:items-end md:justify-between">
-          <div>
-            <span className="font-display text-4xl font-semibold text-limestone md:text-5xl">
-              Dominyum
-            </span>
-            <p className="mt-4 max-w-sm font-sans text-limestone/60">
-              Marketing orientado por dados. Crescimento orientado por receita.
-            </p>
-          </div>
-          
-          <a href={anchor("#contato")}
-            onClick={(e) => handleAnchor(e, "#contato")}
-            className="inline-flex w-fit items-center rounded-full bg-sage px-8 py-4 font-sans font-medium text-carbon transition-colors hover:bg-limestone cursor-pointer"
-          >
-            Vamos escalar
-          </a>
-        </div>
+        {/* A chamada final + marca virou a seção Chamada (src/components/sections) */}
 
         {/* Colunas de links */}
-        <div className="grid gap-10 py-14 sm:grid-cols-3">
+        <div className="grid gap-10 pb-14 sm:grid-cols-3">
           <div>
             <span className="font-sans text-sm uppercase tracking-[0.2em] text-limestone/40">
               Navegação

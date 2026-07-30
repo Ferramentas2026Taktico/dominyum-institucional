@@ -5,14 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useGSAP, ScrollTrigger } from "@/lib/gsap";
 import { useLenis } from "@/components/motion/SmoothScroll";
-
-const links = [
-  { label: "Sistema", href: "#sistema" },
-  { label: "Serviços", href: "#servicos" },
-  { label: "Método", href: "#metodo" },
-  { label: "Resultados", href: "#resultados" },
-  { label: "Sobre", href: "#sobre" },
-];
+import { navLinks } from "@/lib/nav";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -92,7 +85,7 @@ export default function Navbar() {
 
           {/* Links desktop */}
           <ul className="hidden items-center gap-8 md:flex">
-            {links.map((l) => (
+            {navLinks.map((l) => (
               <li key={l.href}>
                 
                 <a  href={anchor(l.href)}
@@ -141,8 +134,8 @@ export default function Navbar() {
           open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}
       >
-        {links.map((l) => (
-          
+        {navLinks.map((l) => (
+
           <a  key={l.href}
             href={anchor(l.href)}
             onClick={(e) => handleClick(e, l.href)}

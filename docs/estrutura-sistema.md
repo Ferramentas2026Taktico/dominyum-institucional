@@ -29,6 +29,7 @@ src/
     layout/           # Navbar, Footer
   lib/
     gsap.ts           # registro único dos plugins GSAP
+    nav.ts            # links de navegação (fonte única p/ Navbar e Footer)
 public/
   brand/              # Logo_Dominyum.png, og-image.png
 ```
