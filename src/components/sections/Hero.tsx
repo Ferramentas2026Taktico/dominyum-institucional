@@ -1,10 +1,18 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { gsap, SplitText, useGSAP } from "@/lib/gsap";
+
+// Fundo em WebGL: fica fora do bundle inicial e nunca renderiza no servidor.
+const Prism = dynamic(() => import("@/components/motion/Prism"), { ssr: false });
 
 export default function Hero() {
     const container = useRef<HTMLElement>(null);
+
+    // Só monta o canvas se o usuário não pediu "reduzir movimento" — quem pediu
+    // fica com o gradiente estático abaixo.
+    const [motionOk, setMotionOk] = useState(false);
 
     useGSAP(
         () => {
@@ -12,6 +20,8 @@ export default function Hero() {
 
             // Só anima se o usuário NÃO pediu "reduzir movimento" no sistema
             mm.add("(prefers-reduced-motion: no-preference)", () => {
+                setMotionOk(true);
+
                 const split = new SplitText(".hero-title", {
                     type: "lines",
                     mask: "lines", // cria a máscara de overflow p/ o efeito de "subir"
@@ -19,14 +29,9 @@ export default function Hero() {
 
                 const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-                tl.from(".hero-block", {
-                    scale: 0.6,
-                    autoAlpha: 0,
-                    duration: 1,
-                    stagger: 0.12,
-                    ease: "power2.out",
-                })
-                    .from(".hero-eyebrow", { y: 20, autoAlpha: 0, duration: 0.6 }, "-=0.7")
+                // O prisma entra em fade junto do texto — esconde o primeiro frame do canvas
+                tl.from(".hero-prism", { autoAlpha: 0, duration: 1.6, ease: "power2.out" }, 0)
+                    .from(".hero-eyebrow", { y: 20, autoAlpha: 0, duration: 0.6 }, 0)
                     .from(
                         split.lines,
                         { yPercent: 110, autoAlpha: 0, duration: 0.9, stagger: 0.15 },
@@ -36,9 +41,11 @@ export default function Hero() {
                     .from(".hero-cta", { y: 20, autoAlpha: 0, duration: 0.6 }, "-=0.3")
                     .from(".hero-scroll", { autoAlpha: 0, duration: 0.6 }, "-=0.2");
 
-                // Parallax no scroll — blocos e "D" derivam em ritmos diferentes
-                gsap.to(".hero-d", {
-                    yPercent: -12,
+                // Parallax: o prisma anda um pouco mais que o scroll.
+                // O curso (56px) tem de ser MENOR que a folga vertical do wrapper
+                // (-inset-y-16 = 64px), senão a aresta do canvas entra em quadro.
+                gsap.to(".hero-prism", {
+                    y: -56,
                     ease: "none",
                     scrollTrigger: {
                         trigger: container.current,
@@ -48,20 +55,10 @@ export default function Hero() {
                     },
                 });
 
-                gsap.utils.toArray<HTMLElement>(".hero-block").forEach((block) => {
-                    gsap.to(block, {
-                        yPercent: Number(block.dataset.speed) || 0,
-                        ease: "none",
-                        scrollTrigger: {
-                            trigger: container.current,
-                            start: "top top",
-                            end: "bottom top",
-                            scrub: true,
-                        },
-                    });
-                });
-
-                return () => split.revert(); // desfaz o split ao desmontar
+                return () => {
+                    split.revert(); // desfaz o split ao desmontar
+                    setMotionOk(false);
+                };
             });
         },
         { scope: container }
@@ -70,38 +67,59 @@ export default function Hero() {
     return (
         <section
             ref={container}
-            className="relative flex min-h-screen flex-col justify-center overflow-hidden px-6 md:px-12"
+            className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 text-center md:px-12"
         >
-            {/* Blocos flutuantes — rotação via style inline p/ não conflitar com o transform do GSAP */}
-            <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-                <span
-                    data-speed="-30"
-                    style={{ rotate: "-8deg" }}
-                    className="hero-block absolute left-[8%] top-[18%] h-16 w-28 rounded-2xl bg-sage/80 md:h-28 md:w-44"
-                />
-                <span
-                    data-speed="20"
-                    style={{ rotate: "6deg" }}
-                    className="hero-block absolute right-[10%] top-[22%] h-20 w-32 rounded-2xl bg-verdant md:h-32 md:w-52"
-                />
-                <span
-                    data-speed="-50"
-                    style={{ rotate: "-4deg" }}
-                    className="hero-block absolute bottom-[16%] right-[22%] h-14 w-24 rounded-2xl bg-limestone/90 md:h-24 md:w-40"
-                />
-                </div>
-
-            <span
+            {/* Fallback estático: vale para "reduzir movimento" e para falha de WebGL */}
+            <div
                 aria-hidden
-                className="hero-d pointer-events-none absolute -right-6 bottom-[-2rem] -z-10 select-none font-display text-[11rem] leading-none text-verdant/50 sm:text-[16rem] md:-right-10 md:bottom-[-6rem] md:text-[20rem] lg:text-[26rem]"
-            >
-                D
-            </span>
+                className="pointer-events-none absolute inset-0 -z-20"
+                style={{
+                    background:
+                        "radial-gradient(55% 45% at 50% 88%, rgba(154,199,178,0.20), transparent 72%), radial-gradient(45% 55% at 50% 58%, rgba(8,68,68,0.55), transparent 75%)",
+                }}
+            />
 
-            <div className="relative z-10 max-w-4xl">
-                <p className="hero-eyebrow mb-6 flex items-center gap-3 font-sans text-sm uppercase tracking-[0.2em] text-sage">
-                    <span className="inline-block h-px w-8 bg-sage" />
+            {/* Prisma em WebGL. A folga vertical (-inset-y-16) é o que o parallax
+                consome ao transladar — sem ela, a aresta do canvas viraria uma
+                linha visível. O overflow-hidden da seção recorta a sobra. */}
+            <div
+                aria-hidden
+                className="hero-prism pointer-events-none absolute inset-x-0 -inset-y-16 -z-10"
+            >
+                {motionOk && (
+                    <Prism
+                        animationType="rotate"
+                        timeScale={0.4}
+                        height={3.2}
+                        baseWidth={6.5}
+                        scale={2.2}
+                        glow={0.5}
+                        bloom={0.85}
+                        noise={0.05}
+                        offset={{ x: 0, y: -130 }}
+                        transparent={false}
+                        brandTint={1}
+                        suspendWhenOffscreen
+                    />
+                )}
+            </div>
+
+            {/* Véu por cima do prisma: o radial protege o texto do núcleo do feixe;
+                a faixa linear assenta o indicador de scroll acima da barra de luz */}
+            <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 z-[-5]"
+                style={{
+                    background:
+                        "radial-gradient(55% 42% at 50% 42%, rgba(7,7,7,0.68), transparent 80%), linear-gradient(to top, rgba(7,7,7,0.9) 0%, rgba(7,7,7,0.5) 8%, transparent 16%)",
+                }}
+            />
+
+            <div className="relative z-10 mx-auto max-w-4xl">
+                <p className="hero-eyebrow mb-6 flex items-center justify-center gap-3 font-sans text-sm uppercase tracking-[0.2em] text-sage">
+                    <span className="h-px w-8 bg-sage" />
                     Mais que marketing
+                    <span className="h-px w-8 bg-sage" />
                 </p>
 
                 <h1 className="hero-title font-display text-4xl font-semibold leading-[1.05] text-limestone sm:text-5xl md:text-7xl lg:text-8xl">
@@ -109,9 +127,9 @@ export default function Hero() {
                     <span className="text-sage">crescimento.</span>
                 </h1>
 
-                <p className="hero-sub mt-8 max-w-xl font-sans text-lg leading-relaxed text-limestone/70">
+                <p className="hero-sub mx-auto mt-8 max-w-xl font-sans text-lg leading-relaxed text-limestone/70">
                     Transformamos marketing e vendas em um único sistema orientado por
-                    dados — para escalar com previsibilidade.
+                    dados para escalar com previsibilidade.
                 </p>
 
                 <div className="hero-cta mt-10">

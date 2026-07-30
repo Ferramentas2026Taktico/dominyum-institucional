@@ -25,7 +25,7 @@ src/
       termos/page.tsx
   components/
     sections/         # Hero, Sistema, Servicos, Metodo, Resultados, Sobre, Contato
-    motion/           # SmoothScroll (Lenis + contexto useLenis)
+    motion/           # SmoothScroll (Lenis + contexto useLenis), Prism (fundo WebGL)
     layout/           # Navbar, Footer
   lib/
     gsap.ts           # registro único dos plugins GSAP
@@ -55,8 +55,9 @@ Ver "Convenções de animação" no `CLAUDE.md`. Resumo: `"use client"` +
 
 ## Efeitos por seção
 
-- **Hero:** timeline de entrada (blocos + SplitText no título) + parallax com
-  scrub (blocos e "D").
+- **Hero:** fundo Prism em WebGL (ver `docs/identidade-visual.md`) + timeline de
+  entrada (fade do prisma + SplitText no título) + parallax com scrub no prisma.
+  Conteúdo centralizado.
 - **Sistema:** reveal com stagger (4 pilares).
 - **Serviços:** lista em linhas, reveal com stagger, hover simples.
 - **Método:** trilho (`scaleX`) + etapas em stagger, mesmo gatilho de scroll.

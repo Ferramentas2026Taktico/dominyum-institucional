@@ -13,6 +13,7 @@ tamanhos/espacamentos).
 - **TypeScript**
 - **GSAP** + ScrollTrigger + SplitText + `@gsap/react` (`useGSAP`) — animações
 - **Lenis** — smooth scroll (exposto via contexto React)
+- **ogl** — WebGL mínimo, usado só pelo fundo Prism do Hero
 - **@next/third-parties** — Google Tag Manager
 
 ## Comandos
@@ -37,6 +38,25 @@ Toda seção animada segue o MESMO padrão. Siga-o ao criar ou editar seções:
 5. Conteúdo (texto/dados) renderiza no HTML mesmo sem animação (SEO + fallback);
    a animação só sobrepõe. Nunca deixar texto invisível sem uma animação que o
    traga de volta.
+
+## Fundos em WebGL (canvas)
+
+O Hero usa `src/components/motion/Prism.tsx` (porte do Prism do React Bits, sobre
+`ogl`). Regras ao mexer nele ou criar outro fundo em canvas:
+
+1. Montar via `dynamic(() => import(...), { ssr: false })` **de dentro de um
+   client component** — `page.tsx` é Server Component e não aceita `ssr: false`.
+2. O render loop entra no `gsap.ticker`, nunca num `requestAnimationFrame`
+   próprio: a página tem um loop só (é o mesmo que move o Lenis). Para pausar,
+   use uma flag dentro do callback — **não** remova o listener de dentro do
+   dispatch do ticker, senão o GSAP pula o listener seguinte naquele frame.
+3. `suspendWhenOffscreen` ligado. O shader faz 100 passos de raymarch por pixel;
+   deixar rodando depois que a seção sai da tela queima GPU e bateria.
+4. DPR com teto (1.5), e 1 abaixo de 768px.
+5. Sob `prefers-reduced-motion` o canvas **não monta** — sempre ter um fallback
+   estático em CSS atrás dele (que também cobre falha de contexto WebGL).
+6. O enquadramento do Prism deriva da altura; a correção por aspecto em
+   `resize()` é o que impede o feixe de engolfar a tela no mobile.
 
 ## Padrões de scroll
 
@@ -91,8 +111,8 @@ Toda seção animada segue o MESMO padrão. Siga-o ao criar ou editar seções:
       `robots.ts` e `sitemap.ts`.
 - [ ] **Sitemap:** adicionar `/privacidade` e `/termos` ao `sitemap.ts`.
 - [ ] **Consentimento de cookies (LGPD):** banner + bloqueio condicional do GTM.
-- [ ] **Logo/símbolo:** o "D" do Hero é tipográfico (placeholder); trocar por SVG
-      quando o símbolo estiver disponível.
+- [ ] **Logo/símbolo:** o símbolo "D" ainda não existe como SVG no projeto
+      (o placeholder tipográfico do Hero saiu junto com a entrada do Prism).
 
 ## Docs
 
