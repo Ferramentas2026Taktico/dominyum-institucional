@@ -27,6 +27,7 @@ export default function Navbar() {
     setOpen(false);
     if (isHome) {
       e.preventDefault();
+      lenis?.start();                     // religa o loop ANTES de rolar
       lenis?.scrollTo(href, { offset: -80 });
     }
   };
@@ -53,85 +54,88 @@ export default function Navbar() {
   }, []);
 
   return (
-    <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
-        scrolled || open
-          ? "border-b border-limestone/10 bg-carbon/80 backdrop-blur-md"
-          : "border-b border-transparent bg-transparent"
-      }`}
-    >
-      <nav
-        className={`mx-auto flex max-w-6xl items-center justify-between px-6 transition-all duration-300 md:px-12 ${
-          scrolled ? "py-4" : "py-6"
+    <>
+      <header
+        className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
+          scrolled || open
+            ? "border-b border-limestone/10 bg-carbon/80 backdrop-blur-md"
+            : "border-b border-transparent bg-transparent"
         }`}
       >
-        {/* Logo */}
-        
-          <a href="/"
-          onClick={(e) => {
+        <nav
+          className={`mx-auto flex max-w-6xl items-center justify-between px-6 transition-all duration-300 md:px-12 ${
+            scrolled ? "py-4" : "py-6"
+          }`}
+        >
+          {/* Logo */}
+          
+          <a  href="/"
+            onClick={(e) => {
             setOpen(false);
             if (isHome) {
               e.preventDefault();
+              lenis?.start();
               lenis?.scrollTo(0);
             }
           }}
-          className="relative z-50 cursor-pointer"
-        >
-          <Image
-            src="/brand/Logo_Dominyum.png"
-            alt="Dominyum"
-            width={853}
-            height={152}
-            priority
-            className="h-8 w-auto"
-          />
-        </a>
+            className="relative z-50 cursor-pointer"
+          >
+            <Image
+              src="/brand/Logo_Dominyum.png"
+              alt="Dominyum"
+              width={853}
+              height={152}
+              priority
+              className="h-8 w-auto"
+            />
+          </a>
 
-        {/* Links desktop */}
-        <ul className="hidden items-center gap-8 md:flex">
-          {links.map((l) => (
-            <li key={l.href}>
-              
-                <a href={anchor(l.href)}
-                onClick={(e) => handleClick(e, l.href)}
-                className="cursor-pointer font-sans text-sm text-limestone/70 transition-colors hover:text-sage"
-              >
-                {l.label}
-              </a>
-            </li>
-          ))}
-        </ul>
+          {/* Links desktop */}
+          <ul className="hidden items-center gap-8 md:flex">
+            {links.map((l) => (
+              <li key={l.href}>
+                
+                <a  href={anchor(l.href)}
+                  onClick={(e) => handleClick(e, l.href)}
+                  className="cursor-pointer font-sans text-sm text-limestone/70 transition-colors hover:text-sage"
+                >
+                  {l.label}
+                </a>
+              </li>
+            ))}
+          </ul>
 
-        {/* Botão desktop */}
-        
-          <a href={anchor("#contato")}
-          onClick={(e) => handleClick(e, "#contato")}
-          className="hidden cursor-pointer rounded-full bg-sage px-6 py-2.5 font-sans text-sm font-medium text-carbon transition-colors hover:bg-limestone md:inline-flex"
-        >
-          Fale com a gente
-        </a>
+          {/* Botão desktop */}
+          
+          <a  href={anchor("#contato")}
+            onClick={(e) => handleClick(e, "#contato")}
+            className="hidden cursor-pointer rounded-full bg-sage px-6 py-2.5 font-sans text-sm font-medium text-carbon transition-colors hover:bg-limestone md:inline-flex"
+          >
+            Fale com a gente
+          </a>
 
-        {/* Hambúrguer (mobile) */}
-        <button
-          onClick={() => setOpen((v) => !v)}
-          aria-label="Menu"
-          aria-expanded={open}
-          className="relative z-50 flex h-10 w-10 flex-col items-center justify-center gap-[7px] md:hidden"
-        >
-          <span
-            className={`h-0.5 w-6 bg-limestone transition-all duration-300 ${
-              open ? "translate-y-[4.5px] rotate-45" : ""
-            }`}
-          />
-          <span
-            className={`h-0.5 w-6 bg-limestone transition-all duration-300 ${
-              open ? "-translate-y-[4.5px] -rotate-45" : ""
-            }`}
-          />
-        </button>
-      </nav>
+          {/* Hambúrguer (mobile) */}
+          <button
+            onClick={() => setOpen((v) => !v)}
+            aria-label="Menu"
+            aria-expanded={open}
+            className="relative z-50 flex h-10 w-10 flex-col items-center justify-center gap-[7px] md:hidden"
+          >
+            <span
+              className={`h-0.5 w-6 bg-limestone transition-all duration-300 ${
+                open ? "translate-y-[4.5px] rotate-45" : ""
+              }`}
+            />
+            <span
+              className={`h-0.5 w-6 bg-limestone transition-all duration-300 ${
+                open ? "-translate-y-[4.5px] -rotate-45" : ""
+              }`}
+            />
+          </button>
+        </nav>
+      </header>
 
-      {/* Overlay mobile */}
+      {/* Overlay mobile — FORA do header, pra não sofrer com o backdrop-blur */}
       <div
         className={`fixed inset-0 z-40 flex flex-col items-center justify-center gap-8 bg-carbon transition-all duration-300 md:hidden ${
           open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
@@ -139,7 +143,7 @@ export default function Navbar() {
       >
         {links.map((l) => (
           
-            <a key={l.href}
+          <a  key={l.href}
             href={anchor(l.href)}
             onClick={(e) => handleClick(e, l.href)}
             className="cursor-pointer font-display text-3xl text-limestone transition-colors hover:text-sage"
@@ -148,13 +152,13 @@ export default function Navbar() {
           </a>
         ))}
         
-          <a href={anchor("#contato")}
+        <a href={anchor("#contato")}
           onClick={(e) => handleClick(e, "#contato")}
           className="mt-4 cursor-pointer rounded-full bg-sage px-8 py-4 font-sans font-medium text-carbon"
         >
           Fale com a gente
         </a>
       </div>
-    </header>
+    </>
   );
 }

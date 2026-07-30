@@ -77,23 +77,23 @@ export default function Hero() {
                 <span
                     data-speed="-30"
                     style={{ rotate: "-8deg" }}
-                    className="hero-block absolute left-[8%] top-[18%] h-28 w-44 rounded-2xl bg-sage/80"
+                    className="hero-block absolute left-[8%] top-[18%] h-16 w-28 rounded-2xl bg-sage/80 md:h-28 md:w-44"
                 />
                 <span
                     data-speed="20"
                     style={{ rotate: "6deg" }}
-                    className="hero-block absolute right-[10%] top-[22%] h-32 w-52 rounded-2xl bg-verdant"
+                    className="hero-block absolute right-[10%] top-[22%] h-20 w-32 rounded-2xl bg-verdant md:h-32 md:w-52"
                 />
                 <span
                     data-speed="-50"
                     style={{ rotate: "-4deg" }}
-                    className="hero-block absolute bottom-[16%] right-[22%] h-24 w-40 rounded-2xl bg-limestone/90"
+                    className="hero-block absolute bottom-[16%] right-[22%] h-14 w-24 rounded-2xl bg-limestone/90 md:h-24 md:w-40"
                 />
-            </div>
+                </div>
 
             <span
                 aria-hidden
-                className="hero-d pointer-events-none absolute -right-10 bottom-[-6rem] -z-10 select-none font-display text-[26rem] leading-none text-verdant/50"
+                className="hero-d pointer-events-none absolute -right-6 bottom-[-2rem] -z-10 select-none font-display text-[11rem] leading-none text-verdant/50 sm:text-[16rem] md:-right-10 md:bottom-[-6rem] md:text-[20rem] lg:text-[26rem]"
             >
                 D
             </span>
@@ -104,7 +104,7 @@ export default function Hero() {
                     Mais que marketing
                 </p>
 
-                <h1 className="hero-title font-display text-5xl font-semibold leading-[1.05] text-limestone md:text-7xl lg:text-8xl">
+                <h1 className="hero-title font-display text-4xl font-semibold leading-[1.05] text-limestone sm:text-5xl md:text-7xl lg:text-8xl">
                     Um motor de <br />
                     <span className="text-sage">crescimento.</span>
                 </h1>
