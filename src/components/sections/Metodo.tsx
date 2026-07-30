@@ -54,7 +54,7 @@ export default function Metodo() {
     <section
       ref={container}
       id="metodo"
-      className="relative bg-slate px-6 py-32 md:px-12"
+      className="relative bg-slate px-6 py-20 md:px-12 md:py-32"
     >
       <div className="mx-auto max-w-6xl">
         <p className="mb-4 font-sans text-sm uppercase tracking-[0.2em] text-sage">

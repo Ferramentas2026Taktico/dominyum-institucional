@@ -90,7 +90,7 @@ export default function Sobre() {
     <section
       ref={container}
       id="sobre"
-      className="relative overflow-hidden bg-slate px-6 py-32 md:px-12"
+      className="relative overflow-hidden bg-slate px-6 py-20 md:px-12 md:py-32"
     >
       <div className="mx-auto max-w-6xl">
         {/* Filosofia (statement de abertura) */}
