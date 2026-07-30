@@ -4,6 +4,7 @@ import { Sora, Roboto } from "next/font/google";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import "./globals.css";
+import { GoogleTagManager } from "@next/third-parties/google";
 
 const sora = Sora({
   subsets: ["latin"],
@@ -45,8 +46,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/brand/og-image.png",
-        width: 1200,
-        height: 630,
+        width: 1080,
+        height: 565,
         alt: "Dominyum",
       },
     ],
@@ -65,9 +66,11 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
   return (
     <html lang="pt-BR" className={`${sora.variable} ${roboto.variable}`}>
       <body>
+        {gtmId && <GoogleTagManager gtmId={gtmId} />}
         <SmoothScroll>
           <Navbar />
           {children}
