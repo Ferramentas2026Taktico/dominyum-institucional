@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useGSAP, ScrollTrigger } from "@/lib/gsap";
 import { useLenis } from "@/components/motion/SmoothScroll";
-import Image from "next/image";
 
 const links = [
   { label: "Sistema", href: "#sistema" },
@@ -15,16 +16,22 @@ const links = [
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
-
+  const [open, setOpen] = useState(false);
   const lenis = useLenis();
 
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+  const anchor = (href: string) => (isHome ? href : `/${href}`);
+
   const handleClick = (e: React.MouseEvent, href: string) => {
-    e.preventDefault();
-    lenis?.scrollTo(href, { offset: -80 }); // -80 compensa a altura da navbar fixa
+    setOpen(false);
+    if (isHome) {
+      e.preventDefault();
+      lenis?.scrollTo(href, { offset: -80 });
+    }
   };
 
   useGSAP(() => {
-    // Dispara sempre que o scroll passa/volta dos 60px
     ScrollTrigger.create({
       start: 0,
       end: "max",
@@ -32,10 +39,23 @@ export default function Navbar() {
     });
   });
 
+  useEffect(() => {
+    if (!lenis) return;
+    if (open) lenis.stop();
+    else lenis.start();
+  }, [open, lenis]);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const onChange = (e: MediaQueryListEvent) => e.matches && setOpen(false);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
   return (
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
-        scrolled
+        scrolled || open
           ? "border-b border-limestone/10 bg-carbon/80 backdrop-blur-md"
           : "border-b border-transparent bg-transparent"
       }`}
@@ -45,12 +65,17 @@ export default function Navbar() {
           scrolled ? "py-4" : "py-6"
         }`}
       >
-        <a href="#top"
+        {/* Logo */}
+        
+          <a href="/"
           onClick={(e) => {
-            e.preventDefault();
-            lenis?.scrollTo(0);
+            setOpen(false);
+            if (isHome) {
+              e.preventDefault();
+              lenis?.scrollTo(0);
+            }
           }}
-          className="cursor-pointer"
+          className="relative z-50 cursor-pointer"
         >
           <Image
             src="/brand/Logo_Dominyum.png"
@@ -62,28 +87,74 @@ export default function Navbar() {
           />
         </a>
 
+        {/* Links desktop */}
         <ul className="hidden items-center gap-8 md:flex">
           {links.map((l) => (
             <li key={l.href}>
               
-                <a href={l.href}
+                <a href={anchor(l.href)}
                 onClick={(e) => handleClick(e, l.href)}
-                className="font-sans text-sm text-limestone/70 transition-colors hover:text-sage cursor-pointer"
-                >
+                className="cursor-pointer font-sans text-sm text-limestone/70 transition-colors hover:text-sage"
+              >
                 {l.label}
-                </a>
+              </a>
             </li>
           ))}
         </ul>
 
+        {/* Botão desktop */}
         
-          <a href="#contato"
-            onClick={(e) => handleClick(e, "#contato")}
-        className="rounded-full bg-sage px-6 py-2.5 font-sans text-sm font-medium text-carbon transition-colors hover:bg-limestone cursor-pointer"
+          <a href={anchor("#contato")}
+          onClick={(e) => handleClick(e, "#contato")}
+          className="hidden cursor-pointer rounded-full bg-sage px-6 py-2.5 font-sans text-sm font-medium text-carbon transition-colors hover:bg-limestone md:inline-flex"
         >
-        Fale com a gente
+          Fale com a gente
         </a>
+
+        {/* Hambúrguer (mobile) */}
+        <button
+          onClick={() => setOpen((v) => !v)}
+          aria-label="Menu"
+          aria-expanded={open}
+          className="relative z-50 flex h-10 w-10 flex-col items-center justify-center gap-[7px] md:hidden"
+        >
+          <span
+            className={`h-0.5 w-6 bg-limestone transition-all duration-300 ${
+              open ? "translate-y-[4.5px] rotate-45" : ""
+            }`}
+          />
+          <span
+            className={`h-0.5 w-6 bg-limestone transition-all duration-300 ${
+              open ? "-translate-y-[4.5px] -rotate-45" : ""
+            }`}
+          />
+        </button>
       </nav>
+
+      {/* Overlay mobile */}
+      <div
+        className={`fixed inset-0 z-40 flex flex-col items-center justify-center gap-8 bg-carbon transition-all duration-300 md:hidden ${
+          open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      >
+        {links.map((l) => (
+          
+            <a key={l.href}
+            href={anchor(l.href)}
+            onClick={(e) => handleClick(e, l.href)}
+            className="cursor-pointer font-display text-3xl text-limestone transition-colors hover:text-sage"
+          >
+            {l.label}
+          </a>
+        ))}
+        
+          <a href={anchor("#contato")}
+          onClick={(e) => handleClick(e, "#contato")}
+          className="mt-4 cursor-pointer rounded-full bg-sage px-8 py-4 font-sans font-medium text-carbon"
+        >
+          Fale com a gente
+        </a>
+      </div>
     </header>
   );
 }

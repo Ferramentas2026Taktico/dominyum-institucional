@@ -1,6 +1,7 @@
 "use client";
 
 import { useLenis } from "@/components/motion/SmoothScroll";
+import { usePathname } from "next/navigation";
 
 const navLinks = [
   { label: "Sistema", href: "#sistema" },
@@ -18,9 +19,15 @@ const social = [
 export default function Footer() {
   const lenis = useLenis();
 
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+  const anchor = (href: string) => (isHome ? href : `/${href}`);
+
   const handleAnchor = (e: React.MouseEvent, href: string) => {
-    e.preventDefault();
-    lenis?.scrollTo(href, { offset: -80 });
+    if (isHome) {
+      e.preventDefault();
+      lenis?.scrollTo(href, { offset: -80 });
+    }
   };
 
   return (
@@ -37,7 +44,7 @@ export default function Footer() {
             </p>
           </div>
           
-            <a href="#contato"
+          <a href={anchor("#contato")}
             onClick={(e) => handleAnchor(e, "#contato")}
             className="inline-flex w-fit items-center rounded-full bg-sage px-8 py-4 font-sans font-medium text-carbon transition-colors hover:bg-limestone cursor-pointer"
           >
@@ -55,9 +62,9 @@ export default function Footer() {
               {navLinks.map((l) => (
                 <li key={l.href}>
                   
-                    <a href={l.href}
+                  <a href={anchor(l.href)}
                     onClick={(e) => handleAnchor(e, l.href)}
-                    className="font-sans text-limestone/70 transition-colors hover:text-sage cursor-pointer"
+                    className="cursor-pointer font-sans text-limestone/70 transition-colors hover:text-sage"
                   >
                     {l.label}
                   </a>
@@ -73,7 +80,7 @@ export default function Footer() {
             <ul className="mt-5 flex flex-col gap-3">
               <li>
                 
-                  <a href="mailto:contato@dominyum.com"
+                <a  href="mailto:contato@dominyum.com"
                   className="font-sans text-limestone/70 transition-colors hover:text-sage"
                 >
                   contato@dominyum.com
@@ -90,7 +97,7 @@ export default function Footer() {
               {social.map((s) => (
                 <li key={s.label}>
                   
-                    <a href={s.href}
+                  <a  href={s.href}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="font-sans text-limestone/70 transition-colors hover:text-sage"
