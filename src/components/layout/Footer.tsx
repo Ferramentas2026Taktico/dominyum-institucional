@@ -1,8 +1,15 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useLenis } from "@/components/motion/SmoothScroll";
 import { usePathname } from "next/navigation";
 import { navLinks } from "@/lib/nav";
+
+// Canvas: fora do bundle inicial e nunca no servidor
+const MarcaCaracteres = dynamic(
+  () => import("@/components/motion/MarcaCaracteres"),
+  { ssr: false }
+);
 
 // Só do footer — não vai para lib/nav.ts
 const social = [
@@ -101,6 +108,12 @@ export default function Footer() {
             </a>
           </div>
         </div>
+      </div>
+
+      {/* Assinatura de fechamento: irmã do max-w-6xl e com o padding do footer
+          cancelado, para sangrar de ponta a ponta. */}
+      <div className="-mx-6 mt-6 md:-mx-12">
+        <MarcaCaracteres />
       </div>
     </footer>
   );

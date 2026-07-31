@@ -25,7 +25,8 @@ src/
       termos/page.tsx
   components/
     sections/         # Hero, Sistema, Servicos, Metodo, Resultados, Sobre, Contato
-    motion/           # SmoothScroll (Lenis + contexto useLenis), Prism (fundo WebGL)
+    motion/           # SmoothScroll (Lenis), Prism (fundo WebGL do Hero),
+                      #   MarcaCaracteres (marca em caracteres do footer)
     layout/           # Navbar, Footer
   lib/
     gsap.ts           # registro único dos plugins GSAP

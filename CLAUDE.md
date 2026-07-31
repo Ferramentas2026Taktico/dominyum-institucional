@@ -55,8 +55,45 @@ O Hero usa `src/components/motion/Prism.tsx` (porte do Prism do React Bits, sobr
 4. DPR com teto (1.5), e 1 abaixo de 768px.
 5. Sob `prefers-reduced-motion` o canvas **não monta** — sempre ter um fallback
    estático em CSS atrás dele (que também cobre falha de contexto WebGL).
+   **Exceção deliberada:** canvas 2D barato (ver `MarcaCaracteres`) pode montar e
+   desenhar UM frame estático, sem entrar no ticker. A regra existe pelo custo do
+   shader, não pelo `<canvas>` em si.
 6. O enquadramento do Prism deriva da altura; a correção por aspecto em
    `resize()` é o que impede o feixe de engolfar a tela no mobile.
+
+## Marca em caracteres do footer
+
+`src/components/motion/MarcaCaracteres.tsx` desenha a marca como uma grade de
+caracteres (canvas 2D). A forma vem dos **assets da marca**: o wordmark
+(`/brand/Logo_Dominyum.png`) a partir de 768px, e o símbolo (`/icon.png`) abaixo
+disso. Lições que custaram uma volta cada — não reintroduzir:
+
+1. **A célula não é quadrada.** Um glifo monoespaçado é mais alto que largo. Em
+   grade quadrada os caracteres se tocam na vertical e sobra vão na horizontal —
+   os traços da forma viram pontos e ela dissolve. `cellW` acompanha o avanço
+   medido do glifo; o `drawImage` da máscara recebe o destino já **em células**
+   (largura em `cellW`, altura em `cellH`), então a proporção sai certa sem truque.
+2. **Célula acesa = alpha > 128 E luminância > 128.** Os dois assets são
+   construídos de formas opostas: o wordmark é glifo claro sobre **transparente**,
+   o ícone é branco sobre **preto opaco**. Testar só alpha acende todas as células
+   do ícone e a banda vira um retângulo maciço. (Medido: com o teste combinado,
+   5,5% dos pixels do ícone acendem.)
+3. **Recortar pela caixa de tinta antes de montar a grade.** `icon.png` tem margem
+   preta enorme — o D ocupa ~35% do quadro de 1080px. Sem recorte ele sai
+   minúsculo. Com recorte, a margem interna de cada asset deixa de importar, e a
+   proporção da banda também deriva da tinta, não do arquivo.
+4. **Glifos vêm de um atlas + `drawImage`**, não de `fillText` por caractere. É o
+   que sustenta ~900 caracteres a 60fps.
+5. **Callback de fora vai para um ref, nunca para as dependências do efeito.** Uma
+   arrow inline troca de identidade a cada render; no clique o efeito remontava e
+   desfazia a animação no mesmo frame. (Hoje a dica mora dentro do componente, o
+   que remove a classe do bug — não reintroduzir prop de callback aqui.)
+6. **`linhasAlvo` é por asset.** Granularidade não é global: uma forma cheia (o
+   símbolo) fecha bem com ~22 linhas, um wordmark de traço fino em caixa baixa
+   pede mais, senão as hastes viram pontos soltos.
+7. **O fallback em texto é para falha da imagem** (404/rede), não para tela
+   estreita — o símbolo quadrado resolveu o mobile, porque a altura da forma passou
+   a ser `largura × preenchimento`, e não `largura / 8.8` como no wordmark inteiro.
 
 ## Padrões de scroll
 
