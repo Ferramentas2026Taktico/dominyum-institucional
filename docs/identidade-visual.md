@@ -59,3 +59,21 @@ canvas nenhum: fica só um gradiente estático sage/verdant.
 - **Símbolo "D":** tem um recorte/gap característico. Ainda não existe como SVG
   no projeto — adicionar quando o arquivo estiver disponível. (O "D" tipográfico
   que servia de placeholder no Hero foi removido junto com a entrada do Prism.)
+
+## Marca em caracteres do footer
+
+O rodapé fecha com a marca desenhada por uma grade de caracteres
+(`src/components/motion/MarcaCaracteres.tsx`), com campo de repulsão no ponteiro e
+clique que bagunça/remonta.
+
+A forma vem dos **arquivos reais da marca**, não de texto na fonte:
+
+- a partir de 768px: `public/brand/Logo_Dominyum.png` (o wordmark)
+- abaixo de 768px: `src/app/icon.png` (só o símbolo, servido em `/icon.png`)
+
+Isso **não depende** do símbolo existir em SVG: a máscara é reamostrada numa grade
+de ~22 linhas de caractere, então 1080px de raster é folga de sobra. Se um dia o
+SVG entrar, basta trocar a `src`.
+
+Se a imagem não carregar, o componente cai no wordmark em texto — nunca banda
+vazia. Sob `prefers-reduced-motion` o canvas desenha um único frame estático.

@@ -1,13 +1,69 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useLenis } from "@/components/motion/SmoothScroll";
 import { usePathname } from "next/navigation";
 import { navLinks } from "@/lib/nav";
 
+// Canvas: fora do bundle inicial e nunca no servidor
+const MarcaCaracteres = dynamic(
+  () => import("@/components/motion/MarcaCaracteres"),
+  { ssr: false }
+);
+
+/**
+ * Ícones em contorno e com `currentColor`: herdando a cor, o
+ * `transition-colors hover:text-sage` do link já arrasta o ícone junto, sem
+ * código a mais. Contorno nos dois (o mark oficial do LinkedIn é sólido) para os
+ * glifos não ficarem com pesos visuais diferentes lado a lado.
+ */
+const propsIcone = {
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 1.6,
+  strokeLinecap: "round" as const,
+  strokeLinejoin: "round" as const,
+  "aria-hidden": true,
+  className: "h-5 w-5 shrink-0",
+};
+
+function IconeInstagram() {
+  return (
+    <svg {...propsIcone}>
+      <rect x="3" y="3" width="18" height="18" rx="5.2" />
+      <circle cx="12" cy="12" r="4.1" />
+      <circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function IconeLinkedIn() {
+  return (
+    <svg {...propsIcone}>
+      <rect x="3" y="3" width="18" height="18" rx="3.2" />
+      {/* o "i" */}
+      <circle cx="7.6" cy="7.7" r="0.95" fill="currentColor" stroke="none" />
+      <path d="M7.6 10.7v6.1" />
+      {/* o "n" */}
+      <path d="M11.4 16.8v-6.1" />
+      <path d="M11.4 13.4a2.7 2.7 0 0 1 5.3 0v3.4" />
+    </svg>
+  );
+}
+
 // Só do footer — não vai para lib/nav.ts
 const social = [
-  { label: "Instagram", href: "https://instagram.com/dominyum" },
-  { label: "LinkedIn", href: "#" },
+  {
+    label: "Instagram",
+    href: "https://www.instagram.com/dominyumbr/",
+    Icone: IconeInstagram,
+  },
+  {
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/company/dominyum/",
+    Icone: IconeLinkedIn,
+  },
 ];
 
 export default function Footer() {
@@ -57,10 +113,10 @@ export default function Footer() {
             <ul className="mt-5 flex flex-col gap-3">
               <li>
                 
-                <a  href="mailto:contato@dominyum.com"
+                <a  href="mailto:contato@dominyum.com.br"
                   className="font-sans text-limestone/70 transition-colors hover:text-sage"
                 >
-                  contato@dominyum.com
+                  contato@dominyum.com.br
                 </a>
               </li>
             </ul>
@@ -73,12 +129,13 @@ export default function Footer() {
             <ul className="mt-5 flex flex-col gap-3">
               {social.map((s) => (
                 <li key={s.label}>
-                  
-                  <a  href={s.href}
+                  <a
+                    href={s.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-sans text-limestone/70 transition-colors hover:text-sage"
+                    className="inline-flex items-center gap-2.5 font-sans text-limestone/70 transition-colors hover:text-sage"
                   >
+                    <s.Icone />
                     {s.label}
                   </a>
                 </li>
@@ -101,6 +158,12 @@ export default function Footer() {
             </a>
           </div>
         </div>
+      </div>
+
+      {/* Assinatura de fechamento: irmã do max-w-6xl e com o padding do footer
+          cancelado, para sangrar de ponta a ponta. */}
+      <div className="-mx-6 mt-6 md:-mx-12">
+        <MarcaCaracteres />
       </div>
     </footer>
   );
