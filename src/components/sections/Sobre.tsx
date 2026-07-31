@@ -122,7 +122,7 @@ export default function Sobre() {
             <p className="mt-5 font-sans text-lg leading-relaxed text-limestone/70">
               Liderar uma transformação no mercado, formando uma geração de
               empresas que entendem que marketing não é propaganda, mas a
-              engenharia do crescimento — responsável por estruturar, impulsionar e
+              engenharia do crescimento responsável por estruturar, impulsionar e
               escalar.
             </p>
           </div>

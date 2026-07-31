@@ -22,7 +22,7 @@ const pilares = [
   {
     n: "04",
     titulo: "Resultado",
-    texto: "Domínio sobre a receita — mensurável, previsível, escalável.",
+    texto: "Domínio sobre a receita, tornando-a mensurável, previsível e escalável.",
   },
 ];
 

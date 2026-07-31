@@ -22,7 +22,7 @@ const roboto = Roboto({
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.dominyum.com.br"), // TROQUE pelo domínio real
   title: {
-    default: "Dominyum — Marketing orientado por dados",
+    default: "Dominyum | Marketing orientado por dados",
     template: "%s | Dominyum",
   },
   description:
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     locale: "pt_BR",
     url: "https://www.dominyum.com.br",
     siteName: "Dominyum",
-    title: "Dominyum — Marketing orientado por dados",
+    title: "Dominyum | Marketing orientado por dados",
     description:
       "Transformamos marketing e vendas em um único sistema orientado por dados. Escale com previsibilidade.",
     images: [
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Dominyum — Marketing orientado por dados",
+    title: "Dominyum | Marketing orientado por dados",
     description:
       "Transformamos marketing e vendas em um único sistema orientado por dados.",
     images: ["/brand/og-image.png"],
