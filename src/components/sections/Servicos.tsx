@@ -6,27 +6,27 @@ import { gsap, useGSAP } from "@/lib/gsap";
 const servicos = [
   {
     n: "01",
-    titulo: "Aquisição",
-    texto: "Tráfego pago, geração de leads e demand generation com foco em receita.",
-    tags: ["Tráfego Pago", "Geração de Leads", "Demand Generation"],
+    titulo: "Diagnóstico",
+    texto: "Mapeamos onde sua operação de marketing está e o que trava a previsibilidade.",
+    tags: ["Mapa da operação", "Gargalos", "Metas"],
   },
   {
     n: "02",
-    titulo: "Conversão",
-    texto: "Funis desenhados pra transformar interesse em pipeline previsível.",
-    tags: ["Funis de Venda", "CRO", "Copywriting"],
+    titulo: "Estrutura",
+    texto: "Desenhamos processos replicáveis, funil e integração entre marketing e comercial.",
+    tags: ["Processos", "Funil", "Integração comercial"],
   },
   {
     n: "03",
-    titulo: "Inteligência",
-    texto: "Dados centralizados que viram decisão — não relatório parado.",
-    tags: ["Business Intelligence", "Analytics", "Dashboards"],
+    titulo: "Capacitação",
+    texto: "Preparamos o time interno para operar a estratégia com autonomia.",
+    tags: ["Time preparado", "Playbooks", "Rituais"],
   },
   {
     n: "04",
-    titulo: "Crescimento",
-    texto: "Estratégia orientada a performance e receita recorrente.",
-    tags: ["Growth Marketing", "Revenue Growth", "Planejamento"],
+    titulo: "Governança",
+    texto: "Indicadores, responsabilidades e ritmo de gestão para crescimento contínuo.",
+    tags: ["Indicadores", "Responsabilidades", "Cadência"],
   },
 ];
 
@@ -65,7 +65,7 @@ export default function Servicos() {
           O que fazemos
         </p>
         <h2 className="max-w-2xl font-display text-4xl font-semibold leading-tight text-limestone md:text-6xl">
-          Um sistema, quatro frentes.
+          Transformamos sua operação, não substituímos seu time.
         </h2>
 
         <div className="servicos-list mt-16 flex flex-col">
