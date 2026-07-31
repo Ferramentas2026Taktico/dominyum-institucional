@@ -26,6 +26,64 @@ Resultados (carbon) → Sobre (slate) → Contato (carbon).
 
 Ao criar novas seções, manter a alternância.
 
+**A exceção é o Contato**, que faz a transição por gradiente em vez de troca
+chapada — ver abaixo.
+
+## Fundo do Contato (gradiente verde → preto)
+
+Único gradiente vertical de marca do projeto. Ele existe para **costurar** o Sobre
+(`slate`) ao Footer (`carbon`), e não só para enfeitar: são três camadas
+`aria-hidden` sobre uma seção **sem `bg-*`**.
+
+1. **Base:** `linear-gradient(to bottom, #062628 0%, #062628 6%, #070707 100%)`.
+   Segura o slate EXATO do Sobre nos primeiros 6% e desce numa rampa longa até o
+   carbon EXATO do Footer **em 100%** — o preto fica reservado para o fim.
+2. **Brilho:** dois radiais em `50% 50%` (verdant a 0.85 + núcleo sage a 0.14).
+   **O ponto mais claro da seção é o meio**, não o topo.
+   Não precisa de máscara: com o centro em 50%, a distância elíptica até `y=0` é
+   `0.5h / 0.45h = 1.11` do raio, ou seja já passou do stop transparente. (Isso é
+   consequência da geometria, e foi medido. Na primeira versão o centro era
+   `50% 0%` — força máxima na primeira linha de pixels — e abria 25 de diferença
+   por canal na costura; ali a máscara era obrigatória.)
+3. **Grade:** dois `repeating-linear-gradient` de 1px a 88px, ecoando a grade do
+   Sistema, **ocupando a seção toda**. O fade nos quatro lados vem de duas
+   máscaras lineares cruzadas com **`mask-composite: intersect`**. O `intersect`
+   é obrigatório: o padrão é `add`, que faz a UNIÃO das duas e deixa a grade
+   aparecer até a borda. (Chrome normaliza o valor computado para `source-in`.)
+
+**Medições.** Fronteiras, diferença máxima por canal: **Sobre→Contato = 0** e
+**Contato→Footer = 0**, nas três colunas amostradas.
+
+Perfil vertical na coluna central: `#062628` no topo → **pico `#0b4141` em 50%**
+→ `#070707` em 100%. Em 390px o pico cai em 45% com o mesmo valor. Contraste do
+limestone sobre o brilho: **11,5:1** no desktop, 12,6:1 no mobile — o título passa
+folgado em AA e AAA mesmo com o halo atrás dele.
+
+Grade: brilho da linha (on-line menos vizinho) = **10 no miolo, 1 na borda
+esquerda, 0 no topo, na base e no canto**. É esse contraste que prova o
+`intersect`: na borda esquerda a máscara vertical está aberta e a horizontal
+fechada, então união daria 10 e interseção dá 1.
+
+**Uma consequência que vale saber.** Com o topo obrigado a ser o slate do Sobre
+(para a costura) e o halo sendo radial, a coluna das **bordas** fica mais verde no
+topo do que no meio — só a faixa central tem o pico no meio. Não há como ter as
+duas coisas ao mesmo tempo; a escolha foi a favor da costura invisível.
+
+Se quiserem mais impacto, o parâmetro é a opacidade do radial verdant — o resto do
+sistema não depende dela.
+
+## Formulário (modal de contato)
+
+Primeiros campos de formulário do projeto, então as convenções nascem aqui
+(`components/forms/ModalContato.tsx`, constantes `classeCampo` e `classeRotulo`):
+
+- **Rótulo:** `text-xs uppercase tracking-[0.2em] text-limestone/40` — o mesmo
+  vocabulário dos eyebrows das seções, um passo menor.
+- **Campo:** `rounded-xl border border-limestone/15 bg-limestone/[0.03]`, com
+  `placeholder:text-limestone/25` e foco em `border-sage/60` + `ring-sage/20`.
+- **Erro:** `red-400`/`red-300` do Tailwind. **A paleta não tem token de alerta** e
+  criar um só para isto não se paga — se aparecer um segundo uso, vira token.
+
 ## Fundo do Hero (Prism)
 
 O Hero usa o **Prism** (`src/components/motion/Prism.tsx`), um prisma
