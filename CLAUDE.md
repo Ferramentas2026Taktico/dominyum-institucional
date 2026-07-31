@@ -137,9 +137,8 @@ disso. Lições que custaram uma volta cada — não reintroduzir:
 - [ ] **Placeholders de conteúdo:**
   - Resultados: ROAS/CAC/leads são inventados; só o 52% é real. Trocar pelos
     dados reais.
-  - Contato: e-mail `contato@dominyum.com` é placeholder; formulário real
+  - Contato: e-mail `contato@dominyum.com.br` é placeholder; formulário real
     precisa de backend.
-  - Footer: links de Instagram/LinkedIn são placeholders.
 - [ ] **Texto legal:** `/privacidade` e `/termos` são scaffolds com `[...]` —
       preencher (LGPD), idealmente com apoio jurídico.
 - [ ] **GTM:** definir `NEXT_PUBLIC_GTM_ID` no `.env.local` (e no painel de

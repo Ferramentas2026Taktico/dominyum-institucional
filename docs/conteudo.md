@@ -41,7 +41,7 @@ empresarial."
 - **Resultados:** o 52% é real (vem do branding); ROAS 3.2x, CAC -41% e 2.5x de
   leads são **inventados** — trocar pelos números reais (editar o array `stats`
   em `Resultados.tsx`).
-- **Contato:** e-mail `contato@dominyum.com` é placeholder; sem backend
+- **Contato:** e-mail `contato@dominyum.com.br` é placeholder; sem backend
   (apenas `mailto:`). Formulário real exige backend ou serviço externo.
 - **Footer:** links de Instagram/LinkedIn são de exemplo.
 - **Legais:** o texto entre `[...]` em `/privacidade` e `/termos` é scaffold —

@@ -101,7 +101,7 @@ export default function Contato() {
         {/* Zona magnética: área maior que o botão, pra ele "sentir" o cursor antes */}
         <div className="cta-zone cta-reveal mt-12 p-10">
           
-            <a href="mailto:contato@dominyum.com"
+            <a href="mailto:contato@dominyum.com.br"
             className="cta-magnetic inline-flex items-center rounded-full bg-sage px-10 py-5 font-sans text-lg font-medium text-carbon transition-colors hover:bg-limestone"
           >
             Fale com a gente
@@ -109,7 +109,7 @@ export default function Contato() {
         </div>
 
         <p className="cta-reveal font-sans text-limestone/50">
-          contato@dominyum.com
+          contato@dominyum.com.br
         </p>
       </div>
     </section>
