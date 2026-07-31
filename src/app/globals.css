@@ -20,6 +20,26 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* O ::backdrop do <dialog> é pseudo-elemento: o GSAP não alcança. Por isso a
+   entrada dele é keyframe em CSS, enquanto o painel é animado no JS.
+   `prefers-reduced-motion` desliga só o fade — o escurecimento continua. */
+@keyframes entrada-backdrop {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+dialog[open]::backdrop {
+  animation: entrada-backdrop 0.3s ease forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  dialog[open]::backdrop {
+    animation: none;
+  }
+}
+
 .legal-content h1 {
   font-family: var(--font-display);
   font-size: 2.25rem;

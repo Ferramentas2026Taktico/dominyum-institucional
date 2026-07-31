@@ -1,18 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap } from "@/lib/gsap";
-
-// Media query como fonte externa: evita setState dentro de efeito e ainda reage
-// se o usuário mudar a preferência com a página aberta.
-const QUERY_REDUZIDO = "(prefers-reduced-motion: reduce)";
-const assinaReduzido = (avisar: () => void) => {
-  const mq = window.matchMedia(QUERY_REDUZIDO);
-  mq.addEventListener("change", avisar);
-  return () => mq.removeEventListener("change", avisar);
-};
-const leReduzido = () => window.matchMedia(QUERY_REDUZIDO).matches;
-const leReduzidoNoServidor = () => false;
+import { useMovimentoReduzido } from "@/lib/motion";
 
 /**
  * A marca desenhada por uma grade de caracteres que se trocam, com física por
@@ -138,11 +128,7 @@ export default function MarcaCaracteres({
   const [falhou, setFalhou] = useState(false);
   const [jaClicou, setJaClicou] = useState(false);
 
-  const reduzido = useSyncExternalStore(
-    assinaReduzido,
-    leReduzido,
-    leReduzidoNoServidor
-  );
+  const reduzido = useMovimentoReduzido();
 
   const fonte = estreita ? fonteEstreita : fonteLarga;
 

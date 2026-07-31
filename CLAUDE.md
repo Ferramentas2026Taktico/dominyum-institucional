@@ -95,6 +95,44 @@ disso. Lições que custaram uma volta cada — não reintroduzir:
    estreita — o símbolo quadrado resolveu o mobile, porque a altura da forma passou
    a ser `largura × preenchimento`, e não `largura / 8.8` como no wordmark inteiro.
 
+## Formulário de contato
+
+Três peças: o botão na seção `Contato`, a modal `components/forms/ModalContato` e
+o `POST /api/contato`. Decisões que custaram análise — não desfazer sem motivo:
+
+1. **`<dialog>` nativo com `showModal()`**, não um `<div role="dialog">`. O
+   navegador entrega foco preso, Escape, devolução de foco ao gatilho e fundo
+   inerte de graça — é a classe de código que sai errada sem ninguém notar. E o
+   *top layer* escapa do `overflow-hidden` da seção e de ancestral com
+   `filter`/`transform`, o que mata de véspera a armadilha do overlay da Navbar.
+2. **Abrir o diálogo e animar a entrada no MESMO efeito.** O GSAP só pode tocar o
+   painel depois do `showModal()`, e `useGSAP` roda em *layout effect* — separar
+   em dois efeitos inverte a ordem (o layout effect roda antes do `useEffect`).
+3. **O GSAP anima um div INTERNO, nunca o `<dialog>`** — o `display` dele é
+   alternado pelo navegador. Já o `::backdrop` é pseudo-elemento e o GSAP não
+   alcança: a entrada dele é `@keyframes` no `globals.css`.
+4. **`lenis.stop()` enquanto aberta não é decorativo.** O top layer torna o fundo
+   inerte para *clique*, mas a roda do mouse continua chegando na window e o Lenis
+   rolaria a página atrás.
+5. **Reset de estado no fechamento, não em efeito.** O `<dialog>` fecha no mesmo
+   commit, então a troca de conteúdo não é pintada. Em efeito, além de piscar, o
+   ESLint barra (`react-hooks/set-state-in-effect`).
+6. **E-mail em `text:`, nunca `html:`.** O corpo vem de estranho na internet; em
+   HTML seria injeção de markup na caixa de entrada. O nome vai no assunto, então
+   passa por um achatamento de `\s` — quebra de linha em cabeçalho é injeção de
+   header.
+7. **`reply_to` é o e-mail de quem preencheu**, para "responder" ir ao lead e não
+   ao remetente.
+8. **`RESEND_API_KEY` sem `NEXT_PUBLIC_`** — com o prefixo a chave iria para o
+   bundle do navegador. O `from` TEM de morar no domínio verificado na Resend
+   (`suporte.taktico.com.br`); qualquer outro a API recusa.
+9. **Sem SDK `resend` e sem `zod`.** É um POST só, para o mesmo endpoint que o SDK
+   chama por dentro; e a validação de 5 campos à mão custa menos que a
+   dependência. Mesma escolha do Prism, que foi portado em vez de instalado.
+10. **Honeypot preenchido devolve 200 de mentira.** Dizer "recusado" ensinaria o
+    bot a tentar de outro jeito. O limite por IP é em memória: reinicia a cada
+    cold start e não vale entre instâncias.
+
 ## Padrões de scroll
 
 - **Reveal ao entrar:** `scrollTrigger: { trigger, start: "top 80%" }`, sem
@@ -109,8 +147,12 @@ disso. Lições que custaram uma volta cada — não reintroduzir:
   maiores. Ex.: `text-4xl md:text-7xl`, `py-20 md:py-32`.
 - Seções de conteúdo usam `py-20 md:py-32`. Hero e Contato usam `min-h-screen`
   (não têm `py-32`).
-- Navbar: menu hambúrguer + overlay abaixo de `md`. Efeitos de ponteiro do
-  Contato (holofote/botão magnético) só ligam em `(hover:hover)/(pointer:fine)`.
+- Navbar: menu hambúrguer + overlay abaixo de `md`.
+- **Nenhuma seção tem mais efeito preso a ponteiro fino.** O Contato tinha
+  holofote que seguia o cursor e botão magnético (`(hover:hover)/(pointer:fine)`);
+  os dois saíram. O crescimento do CTA no hover é CSS
+  (`motion-safe:hover:scale-[1.03]`), que já não faz nada em touch. Se voltar a
+  precisar de um efeito assim, o padrão era `gsap.matchMedia` com essa consulta.
 
 ## Navegação
 
@@ -137,10 +179,16 @@ disso. Lições que custaram uma volta cada — não reintroduzir:
 - [ ] **Placeholders de conteúdo:**
   - Resultados: ROAS/CAC/leads são inventados; só o 52% é real. Trocar pelos
     dados reais.
-  - Contato: e-mail `contato@dominyum.com.br` é placeholder; formulário real
-    precisa de backend.
+- [ ] **`RESEND_API_KEY`:** colar a chave no `.env.local` (e no painel de deploy).
+      Sem ela o formulário responde 500 com mensagem amigável e o console avisa —
+      então a ausência é visível, mas o formulário não envia.
+- [ ] **A caixa `contato@dominyum.com.br` precisa existir.** A Resend aceita o
+      envio de qualquer jeito; se o destino não existe, a falha aparece só no
+      painel dela e **o lead desaparece em silêncio**. Conferir antes de publicar.
 - [ ] **Texto legal:** `/privacidade` e `/termos` são scaffolds com `[...]` —
-      preencher (LGPD), idealmente com apoio jurídico.
+      preencher (LGPD), idealmente com apoio jurídico. **O aceite do formulário
+      de contato já linka para `/privacidade`**, então hoje ele aponta para uma
+      página de texto vazio.
 - [ ] **GTM:** definir `NEXT_PUBLIC_GTM_ID` no `.env.local` (e no painel de
       deploy).
 - [ ] **Domínio real:** trocar `https://www.dominyum.com.br` em `layout.tsx`,
