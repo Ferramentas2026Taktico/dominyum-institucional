@@ -44,6 +44,22 @@ const RE_EMAIL = /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/;
 /** Telefone brasileiro: 10 dígitos (fixo) ou 11 (celular). */
 const digitos = (v: string) => v.replace(/\D/g, "");
 
+/**
+ * Teto de links na mensagem. Link é o sinal mais forte de spam de formulário, e 2
+ * é folga: um lead legítimo cola o site dele (1) e no máximo um segundo.
+ *
+ * Mora aqui, e não só no servidor, porque **é regra de validação** — e regra de
+ * validação neste projeto vive num lugar só. Com ela aqui, quem colou três links
+ * vê o aviso no próprio campo antes de qualquer requisição; o servidor continua
+ * sendo a autoridade. O contrário (só no servidor) fazia o formulário mostrar o
+ * erro certo no campo E um banner genérico de "tente de novo" ao mesmo tempo.
+ *
+ * Conta só link explícito. Domínio cru no meio da frase — "somos a
+ * dominyum.com.br" — de propósito NÃO conta: contaria em texto normal.
+ */
+export const MAX_LINKS = 2;
+const contaLinks = (v: string) => (v.match(/https?:\/\/|www\./gi) ?? []).length;
+
 export function validaContato(d: DadosContato): ErrosContato {
   const erros: ErrosContato = {};
 
@@ -66,6 +82,8 @@ export function validaContato(d: DadosContato): ErrosContato {
   if (mensagem.length < 10) erros.mensagem = "Conte um pouco mais do projeto.";
   else if (mensagem.length > LIMITES.mensagem)
     erros.mensagem = "Mensagem muito longa.";
+  else if (contaLinks(mensagem) > MAX_LINKS)
+    erros.mensagem = `Muitos links na mensagem — deixe no máximo ${MAX_LINKS}.`;
 
   if (!d.consentimento) erros.consentimento = "Precisamos do seu aceite.";
 

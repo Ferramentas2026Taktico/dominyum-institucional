@@ -36,7 +36,7 @@ Cada seção é um componente em `src/components/sections/`, composto em
     E-mail, "Descreva sua ideia" / aceite de LGPD / "Enviar mensagem".
   - **Aceite (LGPD):** "Li e concordo com a [Política de Privacidade] e autorizo a
     Dominyum a usar meus dados para responder a este contato."
-  - **Sucesso:** "Mensagem enviada." / "Recebemos seu contato e respondemos em
+  - **Sucesso:** "Mensagem enviada." / "Recebemos seu contato e responderemos em
     breve, no e-mail que você deixou." — de propósito **sem prometer prazo**.
 
 ## Valores oficiais (seção Sobre)

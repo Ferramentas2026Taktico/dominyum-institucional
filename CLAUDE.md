@@ -130,8 +130,55 @@ o `POST /api/contato`. Decisões que custaram análise — não desfazer sem mot
    chama por dentro; e a validação de 5 campos à mão custa menos que a
    dependência. Mesma escolha do Prism, que foi portado em vez de instalado.
 10. **Honeypot preenchido devolve 200 de mentira.** Dizer "recusado" ensinaria o
-    bot a tentar de outro jeito. O limite por IP é em memória: reinicia a cada
-    cold start e não vale entre instâncias.
+    bot a tentar de outro jeito. Nos demais erros vale o oposto — motivo
+    explícito, por campo: ali do outro lado pode ter gente, e sumir com a
+    mensagem dela em silêncio seria pior que um falso positivo declarado.
+
+## Antispam do formulário (modelo de ameaça)
+
+**O `to:` é constante no código, então isto não é relay aberto** — não dá para
+usar o endpoint para spammar terceiros. O pior caso é a caixa da Dominyum encher e
+a cota da Resend queimar, e **é a cota que importa: quando ela acaba, lead de
+verdade para de chegar**. Por isso as defesas aqui limitam VOLUME; identificar bot
+é outro problema (ver "não está aqui" no fim).
+
+1. **`x-forwarded-for` é header do CLIENTE.** Ler o **primeiro** item — como era
+   até aqui — deixa qualquer um ganhar cota nova mandando um valor diferente a
+   cada requisição. Furo real, demonstrado em teste. Ler o **último** é correto
+   independente do host: se o proxy sobrescreve, primeiro e último são iguais; se
+   acrescenta, o último é a visão do proxy, não a do cliente. Antes disso, tentar
+   `x-vercel-forwarded-for`/`cf-connecting-ip`, que o cliente não põe.
+   **No primeiro deploy, conferir quais desses headers chegam de fato** — sem isso
+   a contagem por IP é teoria.
+2. **O teto global por hora (`MAX_GLOBAL`) é o que protege a cota**, e portanto os
+   leads. Vale mesmo se a contagem por IP for contornada. O slot é reservado
+   **antes** do `fetch` para a Resend, não depois do sucesso: chamada recusada
+   também consumiu cota de API — e de bônus é o que permite testar o teto com uma
+   chave inválida, sem entregar e-mail nenhum.
+3. **Contadores em memória:** em serverless o teto real é `MAX_GLOBAL ×
+   instâncias`, e tudo zera a cada cold start. Continua sendo teto, só não exato.
+   Trocar por Redis/KV quando o tráfego legítimo começar a encostar nele.
+4. **O teto de links mora em `lib/contato.ts`, não na rota** — é regra de
+   validação, e regra de validação vive num lugar só. Com ela lá, quem colou três
+   links vê o aviso no campo antes de qualquer requisição. Deixá-la só no servidor
+   fazia o formulário mostrar o erro certo no campo **e** um banner genérico de
+   "tente de novo" ao mesmo tempo, sugerindo falha temporária quando o problema
+   era o conteúdo.
+5. **Erro por campo não acumula banner** no `ModalContato` (`corpo.erros` presente
+   ⇒ `erroGeral` só se o servidor mandar um). É o outro lado da lição acima.
+6. **Anti-duplicata existe pela interação com o teto global:** sem ela um bot de
+   payload fixo consumiria o teto da hora sozinho. A impressão é **liberada** se a
+   Resend falhar — a mensagem não chegou, logo a pessoa tem de poder repetir. O
+   slot global fica consumido de propósito.
+7. **Recusar por tamanho, não cortar com `.slice()`.** Cortar a mensagem de alguém
+   sem avisar é armadilha; e era o que tornava inalcançáveis pelo servidor as
+   mensagens "muito longo" de `validaContato`.
+8. **Não está aqui, de propósito:** desafio (Cloudflare Turnstile) e limite
+   durável (Redis/KV). Turnstile é o que de fato barra bot, mas custa script de
+   terceiro, dependência de conta e uma consideração de LGPD — **gatilho para
+   entrar: a primeira mensagem de spam na caixa.** Limite conhecido que fica:
+   `mensagem` exige 10 caracteres, e `"aaaaaaaaaa"` satisfaz; heurística de texto
+   além disso erra com gente de verdade.
 
 ## Padrões de scroll
 

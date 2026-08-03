@@ -67,9 +67,14 @@ Para animação de scroll o caminho continua sendo `gsap.matchMedia()` — ver
 
 ## `lib/contato.ts`
 
-`validaContato`, `mascaraTelefone` e `LIMITES`. A mesma `validaContato` roda no
-cliente (retorno imediato) e no route handler (autoridade — o cliente é
-contornável). Ficar num arquivo só é o que impede as duas de divergirem.
+`validaContato`, `mascaraTelefone`, `LIMITES` e `MAX_LINKS`. A mesma
+`validaContato` roda no cliente (retorno imediato) e no route handler (autoridade —
+o cliente é contornável). Ficar num arquivo só é o que impede as duas de
+divergirem.
+
+O **teto de links** vive aqui, e não na rota, mesmo sendo uma regra antispam: é
+validação, e validação tem um lugar só. Ver o item 4 de "Antispam do formulário"
+no `CLAUDE.md` para o que aconteceu quando ela ficou só no servidor.
 
 ## Padrão de seção
 
@@ -105,6 +110,13 @@ Três peças: o gatilho na seção `Contato`, a modal `forms/ModalContato` e o
 `POST /api/contato`. Ver "Formulário de contato" no `CLAUDE.md` para as decisões
 que não se leem no código (por que `<dialog>` nativo, por que texto puro no
 e-mail, por que sem SDK da Resend).
+
+**Antispam:** honeypot, limite por IP (1 min), teto global de envios por hora,
+anti-duplicata (10 min) e teto de links. Em ordem no route handler; o modelo de
+ameaça e o porquê de cada um estão em "Antispam do formulário" no `CLAUDE.md`.
+Duas coisas para saber antes de mexer: o teto global é o que protege a cota da
+Resend — e portanto os leads —, e `x-forwarded-for` é header do cliente, então o
+item lido é o **último**, nunca o primeiro.
 
 ## Navegação cross-page
 

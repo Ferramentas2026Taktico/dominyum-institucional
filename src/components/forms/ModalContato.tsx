@@ -209,10 +209,18 @@ export default function ModalContato({ aberto, onFechar }: Props) {
       const corpo = await r.json().catch(() => ({}));
 
       if (!r.ok) {
-        if (corpo?.erros) setErros(corpo.erros as ErrosContato);
-        setErroGeral(
-          corpo?.erro ?? "Não conseguimos enviar agora. Tente de novo."
-        );
+        // Erro por campo NÃO acumula banner: o aviso embaixo do campo já diz o
+        // que corrigir, e um "tente de novo" genérico em cima disso sugere falha
+        // temporária quando o problema é o conteúdo — repetir igual falharia de
+        // novo. Banner só quando não há explicação por campo.
+        if (corpo?.erros) {
+          setErros(corpo.erros as ErrosContato);
+          setErroGeral(corpo?.erro ?? null);
+        } else {
+          setErroGeral(
+            corpo?.erro ?? "Não conseguimos enviar agora. Tente de novo."
+          );
+        }
         setEstado("parado");
         return;
       }
@@ -276,7 +284,7 @@ export default function ModalContato({ aberto, onFechar }: Props) {
               <IconeConfirmado />
             </span>
             <p className="font-sans leading-relaxed text-limestone/70">
-              Recebemos seu contato e respondemos em breve, no e-mail que você
+              Recebemos seu contato e responderemos em breve, no e-mail que você
               deixou.
             </p>
             <button
