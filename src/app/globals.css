@@ -13,11 +13,78 @@
   --font-sans: var(--font-roboto);   /* Roboto — corpo */
 }
 
+/* `color-scheme: dark` é a linha que mais rende aqui, e não é sobre a barra de
+   rolagem só: é o que avisa o navegador que a página é escura. Sem ela o UA
+   desenha barra, controles de formulário, corretor ortográfico e menus nativos em
+   modo claro sobre um site preto — e o resultado varia por plataforma, que é
+   justamente o "não combina" que se vê. */
+:root {
+  color-scheme: dark;
+
+  /* Reserva a canaleta da barra SEMPRE. O Lenis põe `overflow: clip` no <html>
+     quando a modal abre (`.lenis-stopped`), a barra desaparece e o conteúdo
+     centralizado deslocava 7px — medido. Com a canaleta reservada, o espaço
+     continua lá e nada anda. */
+  scrollbar-gutter: stable;
+}
+
 body {
   background-color: var(--color-carbon);
   color: var(--color-limestone);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+}
+
+/* ---------------------------------------------------------------- rolagem
+   ARMADILHA: desde o Chrome 121 as propriedades padrão (`scrollbar-color` e
+   `scrollbar-width`) têm PRECEDÊNCIA sobre os pseudo-elementos `::-webkit-*` —
+   declarar as duas coisas juntas faz o Chrome ignorar todo o desenho fino. Por
+   isso a divisão abaixo é por capacidade, e não por navegador:
+
+   - quem entende `::-webkit-scrollbar` (Chrome, Edge, Safari) recebe o desenho;
+   - quem não entende (Firefox) cai no `@supports not` com as padrão.
+
+   Nunca os dois no mesmo alvo. */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+/* Trilha transparente para a barra funcionar sobre qualquer fundo — na página é
+   o carbon, dentro da modal é o painel, no textarea é o campo. */
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* A borda transparente + `background-clip: padding-box` é o que faz o polegar
+   PARECER fino (6px) sem PERDER área de arrasto: o elemento continua com 10px de
+   largura, só a pintura é recuada. Encostado nas bordas ele lê como scrollbar de
+   sistema; recuado, lê como parte do site. */
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--color-limestone) 22%, transparent);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--color-sage) 55%, transparent);
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: var(--color-sage);
+  background-clip: padding-box;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  :root {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--color-limestone) 28%, transparent)
+      transparent;
+  }
 }
 
 /* O ::backdrop do <dialog> é pseudo-elemento: o GSAP não alcança. Por isso a

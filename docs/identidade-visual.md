@@ -72,6 +72,30 @@ duas coisas ao mesmo tempo; a escolha foi a favor da costura invisível.
 Se quiserem mais impacto, o parâmetro é a opacidade do radial verdant — o resto do
 sistema não depende dela.
 
+## Barra de rolagem
+
+Em `globals.css`. Três decisões que não se leem no CSS:
+
+1. **`color-scheme: dark` no `:root` é a linha que mais rende**, e não é sobre a
+   barra só: é o que avisa o navegador que a página é escura. Sem ela o UA desenha
+   barra, controles de formulário e menus nativos em modo claro sobre um site
+   preto, com resultado variando por plataforma.
+2. **Nunca declarar `scrollbar-color`/`scrollbar-width` junto dos
+   `::-webkit-scrollbar-*`.** Desde o Chrome 121 as propriedades padrão têm
+   PRECEDÊNCIA e desligam todo o desenho fino. A divisão é por capacidade
+   (`@supports not selector(::-webkit-scrollbar)`), não por navegador: Chrome,
+   Edge e Safari pegam os pseudo-elementos; Firefox cai nas padrão.
+3. **`border: 2px solid transparent` + `background-clip: padding-box`** é o que faz
+   o polegar parecer fino sem perder área de arrasto — medido: pintura de 6px
+   dentro de um elemento de 10px. E como `background:` (atalho) reseta o
+   `background-clip`, ele é repetido em `:hover` e `:active`.
+
+`scrollbar-gutter: stable` no `:root` **não é cosmético**: o Lenis põe
+`overflow: clip` no `<html>` quando a modal abre (`.lenis-stopped`), a barra
+desaparece e o conteúdo centralizado deslocava **7px** — medido antes e depois,
+agora 0. Em mobile a barra é sobreposta (largura 0) e a canaleta não reserva nada,
+então não custa largura em tela estreita.
+
 ## Formulário (modal de contato)
 
 Primeiros campos de formulário do projeto, então as convenções nascem aqui
