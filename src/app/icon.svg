@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="722" height="722" viewBox="359 359 722 722">
+  <!-- Simbolo da Dominyum. A geometria da marca (o D, nos dois paths brancos) vem
+       do Logo_Dominyum.ai e esta INTOCADA. Os dois unicos ajustes foram na
+       moldura: a janela do viewBox, que recorta a margem original (o D ocupava
+       34%x41% do quadro e a 16px saia com ~7px), e o canto arredondado abaixo.
+
+       O fundo era um path quadrado com a matriz de flip herdada do PDF; virou um
+       <rect> declarado direto nas coordenadas do viewBox, sem transform. rx=159 e
+       22% de 722, perto do squircle do iOS.
+
+       O D nao precisa de clip: ele ocupa 68%x82% centralizado (medido), entao fica
+       longe dos cantos e nao ha o que vazar para fora do rect. -->
+  <rect x="359" y="359" width="722" height="722" rx="159" fill="#070707" />
+  <g transform="translate(0,-3.6e-5)">
+    <path
+         id="path3"
+         d="m 355.389,475.069 h 66.213 v 225.377 h -66.213 z"
+         style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none"
+         transform="matrix(1.3333333,0,0,-1.3333333,0,1440)" />
+    <path
+         id="path4"
+         d="m 0,0 h -104.919 v -60.861 h 98.225 c 85.625,0 135.157,-62.198 135.157,-169.911 0,-97.622 -44.846,-154.515 -121.769,-154.515 h -99.241 v -60.192 H 13.386 c 109.722,0 183.299,85.629 183.299,214.707 C 196.685,-92.267 117.753,0 0,0"
+         style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none"
+         transform="matrix(1.3333333,0,0,-1.3333333,703.90147,423.01387)" />
+  </g>
+</svg>

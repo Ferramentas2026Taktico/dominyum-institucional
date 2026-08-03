@@ -135,12 +135,36 @@ canvas nenhum: fica só um gradiente estático sage/verdant.
 
 - **Logo (wordmark):** `public/brand/Logo_Dominyum.png` — usado na navbar via
   `next/image`.
-- **Favicon:** `src/app/icon.png` (convenção do App Router; gerado
-  automaticamente).
+- **Ícones do navegador:** `src/app/icon.svg` é a fonte (vetor, exportado do
+  `Logo_Dominyum.ai`). Dele saem, por rasterização, o `favicon.ico` (16/32/48
+  dentro de um contêiner só) e o `apple-icon.png` (180×180). O Next emite os três
+  `<link>` sozinho pela convenção de nome em `app/`.
+
+  **O recorte é o que decide se o ícone funciona.** O export original trazia a
+  margem do arquivo de marca: o D ocupava 34% da largura e 41% da altura, e a 16px
+  saía com ~7px. A correção foi só a janela do `viewBox` (`359 359 722 722`) — a
+  geometria da marca não foi tocada. Hoje o D ocupa 68%×82%, medido.
+
+  **O fundo carbon dentro do próprio SVG não é decoração:** um D branco sobre
+  transparente desaparece na aba de quem usa tema claro.
+
+  **Canto arredondado em 22% do lado** (`rx="159"` num viewBox de 722), perto do
+  squircle do iOS. Como o canto passou a ser transparente, o arredondamento só
+  aparece de fato sobre fundo claro — sobre aba escura ele mostra o escuro atrás e
+  fica indistinguível do quadrado. Conferido nos dois fundos, e medido: alpha 0 no
+  canto, 255 no meio da borda e no centro. Sem essa medição, "arredondado" poderia
+  ser apenas carbon sobre carbon.
+
+  **O `apple-icon.png` é a exceção e continua QUADRADO — não "corrigir".** O iOS
+  aplica a própria máscara arredondada no atalho da tela inicial; arte
+  pré-arredondada produz canto escuro visível dentro do canto do sistema. A Apple
+  pede full-bleed por isso. Ou seja: `icon.svg` e `favicon.ico` arredondam, o apple
+  não, e a inconsistência é deliberada.
 - **OG image:** `public/brand/og-image.png` (1080×630).
-- **Símbolo "D":** tem um recorte/gap característico. Ainda não existe como SVG
-  no projeto — adicionar quando o arquivo estiver disponível. (O "D" tipográfico
-  que servia de placeholder no Hero foi removido junto com a entrada do Prism.)
+- **Símbolo "D":** tem um recorte/gap característico, e ele sobrevive até 16px
+  (conferido ampliando o 16 extraído do `.ico`). Existe em vetor:
+  `src/app/icon.svg`. O `public/brand/simbolo.png` (512) é a versão raster dele,
+  usada como máscara de canvas — ver abaixo.
 
 ## Marca em caracteres do footer
 
@@ -151,7 +175,12 @@ clique que bagunça/remonta.
 A forma vem dos **arquivos reais da marca**, não de texto na fonte:
 
 - a partir de 768px: `public/brand/Logo_Dominyum.png` (o wordmark)
-- abaixo de 768px: `src/app/icon.png` (só o símbolo, servido em `/icon.png`)
+- abaixo de 768px: `public/brand/simbolo.png` (só o símbolo)
+
+**Por que o símbolo tem um PNG próprio em vez de reusar o ícone do navegador:** os
+dois querem coisas diferentes — favicon quer nitidez a 16px, máscara de canvas quer
+resolução para varrer pixel. Enquanto um arquivo servia aos dois (`src/app/icon.png`),
+mexer no ícone mexia na marca do rodapé. Estão desacoplados de propósito.
 
 Isso **não depende** do símbolo existir em SVG: a máscara é reamostrada numa grade
 de ~22 linhas de caractere, então 1080px de raster é folga de sobra. Se um dia o

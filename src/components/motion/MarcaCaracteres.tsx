@@ -110,7 +110,16 @@ export default function MarcaCaracteres({
     preenchimento: 0.92,
     aspectoAprox: 6.1,
   },
-  fonteEstreita = { src: "/icon.png", preenchimento: 0.55, aspectoAprox: 1.5 },
+  // `/brand/simbolo.png` e nao `/icon.png`: o favicon saiu de `src/app/` para o
+  // `icon.svg`, e favicon e máscara de canvas querem coisas diferentes (16px
+  // nítido vs. resolução para varrer). Manter um servindo aos dois amarrava as
+  // duas decisões. A caixa de tinta continua a mesma — só o branco conta como
+  // acesa, então o quadrado carbon não entra na medida.
+  fonteEstreita = {
+    src: "/brand/simbolo.png",
+    preenchimento: 0.55,
+    aspectoAprox: 1.5,
+  },
   rotulo = "Dominyum",
   larguraMinima = 768,
   linhasAlvo = 22,
