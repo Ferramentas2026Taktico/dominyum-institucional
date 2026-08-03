@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import { useLenis } from "@/components/motion/SmoothScroll";
 import { gsap, SplitText, useGSAP } from "@/lib/gsap";
 
 // Fundo em WebGL: fica fora do bundle inicial e nunca renderiza no servidor.
@@ -9,10 +10,20 @@ const Prism = dynamic(() => import("@/components/motion/Prism"), { ssr: false })
 
 export default function Hero() {
     const container = useRef<HTMLElement>(null);
+    const lenis = useLenis();
 
     // Só monta o canvas se o usuário não pediu "reduzir movimento" — quem pediu
     // fica com o gradiente estático abaixo.
     const [motionOk, setMotionOk] = useState(false);
+
+    // Sem isto o navegador dá o salto nativo até a âncora e o Lenis fica de fora
+    // — era o único link de âncora do projeto sem interceptação.
+    // Só renderiza na home (page.tsx), então não precisa do helper anchor()
+    // cross-page que Navbar e Footer usam.
+    const irParaContato = (e: React.MouseEvent) => {
+        e.preventDefault();
+        lenis?.scrollTo("#contato", { offset: -80 });
+    };
 
     useGSAP(
         () => {
@@ -135,7 +146,8 @@ export default function Hero() {
                 <div className="hero-cta mt-10">
 
                     <a href="#contato"
-                        className="inline-flex items-center rounded-full bg-sage px-8 py-4 font-sans font-medium text-carbon transition-colors hover:bg-limestone"
+                        onClick={irParaContato}
+                        className="inline-flex cursor-pointer items-center rounded-full bg-sage px-8 py-4 font-sans font-medium text-carbon transition-colors hover:bg-limestone"
                     >
                         Vamos escalar
                     </a>
