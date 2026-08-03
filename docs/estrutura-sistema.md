@@ -6,7 +6,7 @@
 - `/privacidade`, `/termos` — páginas legais no route group `(legal)` (os
   parênteses fazem a pasta não aparecer na URL)
 - `robots.ts`, `sitemap.ts` — gerados pelo Next
-- `icon.png` — favicon
+- `favicon.ico` (16/32/48), `icon.svg`, `apple-icon.png` — ícones do navegador
 - `POST /api/contato` — recebe o formulário de contato e envia por e-mail
 
 ## Pastas
@@ -17,7 +17,9 @@ src/
     layout.tsx        # fontes, metadata/SEO, GTM, providers
     page.tsx          # compõe as seções da home
     globals.css       # @import "tailwindcss" + @theme (tokens) + .legal-content
-    icon.png          # favicon
+    icon.svg          # ícone do navegador (vetor, fonte dos rasters)
+    favicon.ico       # 16/32/48 dentro, para a URL convencional
+    apple-icon.png    # 180x180, tela inicial do iOS
     robots.ts
     sitemap.ts
     (legal)/
@@ -38,7 +40,7 @@ src/
     motion.ts         # useMovimentoReduzido() — prefers-reduced-motion no render
     contato.ts        # validação + máscara do formulário (cliente E servidor)
 public/
-  brand/              # Logo_Dominyum.png, og-image.png
+  brand/              # Logo_Dominyum.png, simbolo.png, og-image.png
 ```
 
 ## Providers (em `layout.tsx`)

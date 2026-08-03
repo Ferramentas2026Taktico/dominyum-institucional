@@ -65,7 +65,8 @@ O Hero usa `src/components/motion/Prism.tsx` (porte do Prism do React Bits, sobr
 
 `src/components/motion/MarcaCaracteres.tsx` desenha a marca como uma grade de
 caracteres (canvas 2D). A forma vem dos **assets da marca**: o wordmark
-(`/brand/Logo_Dominyum.png`) a partir de 768px, e o símbolo (`/icon.png`) abaixo
+(`/brand/Logo_Dominyum.png`) a partir de 768px, e o símbolo
+(`/brand/simbolo.png`) abaixo
 disso. Lições que custaram uma volta cada — não reintroduzir:
 
 1. **A célula não é quadrada.** Um glifo monoespaçado é mais alto que largo. Em
@@ -78,7 +79,10 @@ disso. Lições que custaram uma volta cada — não reintroduzir:
    o ícone é branco sobre **preto opaco**. Testar só alpha acende todas as células
    do ícone e a banda vira um retângulo maciço. (Medido: com o teste combinado,
    5,5% dos pixels do ícone acendem.)
-3. **Recortar pela caixa de tinta antes de montar a grade.** `icon.png` tem margem
+3. **Recortar pela caixa de tinta antes de montar a grade.** O asset do símbolo
+   já vem recortado hoje, mas o recorte no código FICA: é ele que torna a margem
+   interna de cada asset irrelevante, e é de onde sai a proporção da banda (da
+   tinta, não do arquivo). Histórico que justifica: o `icon.png` original tinha margem
    preta enorme — o D ocupa ~35% do quadro de 1080px. Sem recorte ele sai
    minúsculo. Com recorte, a margem interna de cada asset deixa de importar, e a
    proporção da banda também deriva da tinta, não do arquivo.
@@ -242,8 +246,10 @@ verdade para de chegar**. Por isso as defesas aqui limitam VOLUME; identificar b
       `robots.ts` e `sitemap.ts`.
 - [ ] **Sitemap:** adicionar `/privacidade` e `/termos` ao `sitemap.ts`.
 - [ ] **Consentimento de cookies (LGPD):** banner + bloqueio condicional do GTM.
-- [ ] **Logo/símbolo:** o símbolo "D" ainda não existe como SVG no projeto
-      (o placeholder tipográfico do Hero saiu junto com a entrada do Prism).
+- [x] ~~**Logo/símbolo:** o símbolo "D" não existe como SVG.~~ Existe agora em
+      `src/app/icon.svg`, exportado do `Logo_Dominyum.ai`. Dele saem o
+      `favicon.ico` (16/32/48), o `apple-icon.png` (180) e o
+      `public/brand/simbolo.png` (512, máscara do rodapé).
 
 ## Docs
 
