@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import SmoothScroll from "@/components/motion/SmoothScroll";
 import { Sora, Roboto } from "next/font/google";
 import Navbar from "@/components/layout/Navbar";
@@ -18,6 +18,21 @@ const roboto = Roboto({
   variable: "--font-roboto",
   display: "swap",
 });
+
+/**
+ * `interactiveWidget: "resizes-content"` faz o teclado do celular encolher a
+ * viewport de LAYOUT, e não só a visual. Sem isto, um `position: fixed` (a modal
+ * de contato) continua do tamanho da tela inteira e o rodapé dela fica debaixo do
+ * teclado, fora de alcance.
+ *
+ * `maximumScale`/`userScalable` ficam de fora de propósito: travar zoom quebra
+ * acessibilidade, e o default do Next já é o correto.
+ */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  interactiveWidget: "resizes-content",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.dominyum.com.br"), // TROQUE pelo domínio real
@@ -61,6 +76,30 @@ export const metadata: Metadata = {
   },
   robots: { index: true, follow: true },
   alternates: { canonical: "/" },
+  /**
+   * Desliga os *data detectors* do iOS, que reescrevem o DOM (envolvem texto em
+   * `<a>`) ANTES do React hidratar — e aí o React acusa
+   * "some attributes of the server rendered HTML didn't match".
+   *
+   * Por que a suspeita cai neles: o erro aparece **no load**, **só no Chrome do
+   * iPhone e não no Safari**, e persiste em aba anônima. No iOS os dois navegadores
+   * são o MESMO motor (WebKit), então motor igual com comportamento diferente só
+   * pode vir do aplicativo — e os data detectors são configurados por app, no
+   * `WKWebView`, não pela página. Aba anônima descarta extensão (o Chrome do iOS
+   * não tem extensões). E nada no nosso render depende de ambiente: todo
+   * `window.`/`matchMedia`/`Math.random` vive dentro de efeito, verificado.
+   *
+   * Não reproduz em Chrome headless em nenhuma combinação testada (UA de iPhone,
+   * 3G + CPU 6×, toque antes da hidratação, `prefers-reduced-motion`), então a
+   * confirmação tem de vir do aparelho.
+   */
+  formatDetection: {
+    telephone: false,
+    date: false,
+    address: false,
+    email: false,
+    url: false,
+  },
 };
 
 export default function RootLayout({

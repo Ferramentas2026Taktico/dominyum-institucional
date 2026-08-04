@@ -118,10 +118,13 @@ export default function ModalContato({ aberto, onFechar }: Props) {
       return;
     }
     saindo.current = true;
+    // Sem `scale`: no mobile o painel é uma sheet full-bleed, e escalar revelaria
+    // o backdrop numa faixa nas bordas. Só `y` + fade — que no mobile lê como
+    // slide, o gesto certo para uma sheet, e no desktop os 2% de escala que saíram
+    // eram imperceptíveis.
     gsap.to(alvo, {
       autoAlpha: 0,
       y: 10,
-      scale: 0.985,
       duration: 0.2,
       ease: "power2.in",
       onComplete: concluirFechamento,
@@ -144,13 +147,13 @@ export default function ModalContato({ aberto, onFechar }: Props) {
       if (!dlg.open) dlg.showModal();
 
       if (reduzido) {
-        gsap.set(alvo, { autoAlpha: 1, y: 0, scale: 1 });
+        gsap.set(alvo, { autoAlpha: 1, y: 0 });
         return;
       }
       gsap.fromTo(
         alvo,
-        { autoAlpha: 0, y: 24, scale: 0.98 },
-        { autoAlpha: 1, y: 0, scale: 1, duration: 0.35, ease: "power3.out" }
+        { autoAlpha: 0, y: 24 },
+        { autoAlpha: 1, y: 0, duration: 0.35, ease: "power3.out" }
       );
     },
     { dependencies: [aberto, reduzido] }
@@ -250,13 +253,42 @@ export default function ModalContato({ aberto, onFechar }: Props) {
       onClick={(e) => {
         if (e.target === dialogo.current) fechar();
       }}
-      className="m-auto w-[min(560px,92vw)] max-w-none bg-transparent p-0 text-limestone backdrop:bg-carbon/85"
+      /* `open:flex` — NUNCA `flex` solto. O navegador esconde diálogo fechado com
+         `dialog:not([open]) { display: none }`, e regra de AUTOR vence regra de UA:
+         um `display: flex` cru mantém o diálogo fechado renderizado, e o formulário
+         aparece dentro da seção Contato sem ninguém clicar. Foi o que aconteceu.
+         De quebra, fechado ele não é `:modal`, então não ganha `position: fixed`
+         nem `inset-block: 0` — cai no fluxo, perto do topo, e parece "não
+         centralizado". Um sintoma só, duas aparências.
+
+         O TETO DE ALTURA MORA AQUI, no diálogo, e não no painel. Quando estava
+         dividido (`88dvh` no painel + `max-height` do UA no diálogo, medido contra
+         o *initial containing block*), eram duas restrições em referenciais
+         diferentes e no celular real o painel passava da tela.
+
+         `dvh` é o certo para a sheet: é a viewport visível ATUAL. `svh` reserva
+         espaço para TODO o chrome, inclusive a barra inferior que pode não estar
+         aparecendo — e aí sobra uma folga morta embaixo da sheet. O que fazia
+         `dvh` falhar antes era o teto dividido, não a unidade.
+
+         Abaixo de `sm` ocupa a tela visível inteira (sheet), porque card
+         centralizado sempre vai brigar com tela curta. De `sm` para cima volta a
+         ser o card de 560px centralizado por `m-auto`.
+
+         `sm:h-fit` e NÃO `sm:h-auto` — medido: com `auto`, o card saía com a
+         altura inteira da viewport e sem centralizar. O UA põe `inset-block: 0 0`
+         no `dialog:modal`, e em posicionamento fixo com as duas bordas presas
+         `height: auto` ESTICA para preencher; sem espaço sobrando, o `margin: auto`
+         não tem o que distribuir. `fit-content` é o que o próprio UA usa, e é o que
+         devolve a centralização. */
+      className="m-0 h-[100dvh] max-h-[100dvh] w-full max-w-none flex-col bg-transparent p-0 text-limestone backdrop:bg-carbon/85 open:flex sm:m-auto sm:h-fit sm:w-[min(560px,92vw)]"
     >
       <div
         ref={painel}
-        className="max-h-[88dvh] overflow-y-auto overscroll-contain rounded-2xl border border-limestone/10 bg-carbon p-6 shadow-2xl md:p-8"
+        className="flex min-h-0 w-full flex-1 flex-col border border-limestone/10 bg-carbon shadow-2xl sm:flex-none sm:rounded-2xl"
       >
-        <div className="flex items-start justify-between gap-6">
+        {/* Cabeçalho: não rola. */}
+        <div className="flex shrink-0 items-start justify-between gap-6 px-5 pb-4 pt-5 md:px-8 md:pt-8">
           <div>
             <p className="font-sans text-xs uppercase tracking-[0.2em] text-sage">
               Vamos conversar
@@ -279,7 +311,14 @@ export default function ModalContato({ aberto, onFechar }: Props) {
         </div>
 
         {estado === "ok" ? (
-          <div className="mt-8 flex flex-col items-start gap-4">
+          /* `data-lenis-prevent` + `overscroll-contain` pelo mesmo motivo do miolo
+             do formulário (ver o comentário longo abaixo). Aqui o conteúdo é curto e
+             raramente rola, mas quando rolar — fonte grande do sistema, tela muito
+             baixa — morreria do mesmo jeito. */
+          <div
+            data-lenis-prevent
+            className="flex min-h-0 flex-1 flex-col items-start gap-4 overflow-y-auto overscroll-contain px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4 md:px-8 md:pb-8"
+          >
             <span className="text-sage">
               <IconeConfirmado />
             </span>
@@ -296,7 +335,38 @@ export default function ModalContato({ aberto, onFechar }: Props) {
             </button>
           </div>
         ) : (
-          <form ref={formRef} onSubmit={enviar} noValidate className="mt-7">
+          /* O form é o container flex: um miolo que rola e um rodapé que não. Ele
+             precisa envolver os dois para o submit continuar ligado ao botão. */
+          <form
+            ref={formRef}
+            onSubmit={enviar}
+            noValidate
+            className="flex min-h-0 flex-1 flex-col"
+          >
+            {/* `min-h-0` é OBRIGATÓRIO: sem ele um item flex não encolhe abaixo do
+                próprio conteúdo, o `overflow-y-auto` nunca ativa e o conserto
+                parece não funcionar. É a armadilha clássica de flexbox.
+
+                `data-lenis-prevent` é o que faz o DEDO chegar até aqui. Abrimos a
+                modal com `lenis.stop()`, e o Lenis parado dá `preventDefault()` em
+                TODO `touchmove`/`wheel` que chega na window — inclusive nos que
+                nascem dentro do diálogo. A área rolável existia (medido: 538 de
+                conteúdo em 443 de quadro); o gesto morria antes de chegar nela, e o
+                aceite de LGPD ficava inalcançável. O Lenis testa este atributo
+                ANTES daquele preventDefault, então ele devolve a rolagem nativa
+                deste container — e, por ancestralidade, a de dentro do `<textarea>`.
+                Sem o sufixo `-touch`: a roda do mouse no desktop morria igual.
+
+                Quem trava a página atrás, com o Lenis fora do caminho, NÃO é o
+                `overscroll-contain` daqui: é o `lenis.css`, que põe
+                `.lenis.lenis-stopped { overflow: clip }` no `<html>` enquanto a modal
+                está aberta. Medido dos dois lados — forçando
+                `overscroll-behavior: auto` em runtime a página continua imóvel, e o
+                `overflow` do `<html>` vai de `visible` a `clip` e volta ao fechar. O
+                `overscroll-contain` fica como reforço explícito (o próprio
+                `lenis.css` já o aplica a `[data-lenis-prevent]`, e o nosso sobrevive
+                se aquele import sair de `SmoothScroll`). */}
+            <div data-lenis-prevent className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-5 md:px-8">
             {/* Isca: gente nunca vê, bot preenche. Fora de tela em vez de
                 display:none, que alguns bots detectam. */}
             <input
@@ -309,6 +379,16 @@ export default function ModalContato({ aberto, onFechar }: Props) {
               className="pointer-events-none absolute -left-[9999px] h-0 w-0 opacity-0"
             />
 
+            {/* Empilhado no mobile, duas colunas de `sm` para cima. Com uma coluna
+                o `gap-5` é o espaçamento VERTICAL entre Nome e Telefone, então ele
+                bate com o `mt-5` que separa os outros campos.
+
+                Custo aceito, e medido: uma coluna devolve ~94px de altura, e o
+                formulário passa a rolar por dentro em qualquer altura de celular
+                (538 de conteúdo contra 479 disponíveis no Safari). Rolar não é
+                defeito aqui — o miolo rola, o botão fica fixo no rodapé e o foco no
+                primeiro campo com erro traz o aceite de volta ao quadro. Encolher o
+                textarea não resolveria: cortaria só 24px, e ainda rolaria. */}
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
                 <label htmlFor="contato-nome" className={classeRotulo}>
@@ -404,7 +484,7 @@ export default function ModalContato({ aberto, onFechar }: Props) {
               <textarea
                 id="contato-mensagem"
                 name="mensagem"
-                rows={4}
+                rows={2}
                 maxLength={LIMITES.mensagem}
                 placeholder="Conte o seu desafio ou projeto..."
                 value={dados.mensagem}
@@ -456,23 +536,31 @@ export default function ModalContato({ aberto, onFechar }: Props) {
               </p>
             )}
 
-            {erroGeral && (
-              <p
-                role="alert"
-                className="mt-5 rounded-xl border border-red-400/40 bg-red-400/5 px-4 py-3 font-sans text-sm text-red-200"
-              >
-                {erroGeral}
-              </p>
-            )}
+              {erroGeral && (
+                <p
+                  role="alert"
+                  className="mt-5 rounded-xl border border-red-400/40 bg-red-400/5 px-4 py-3 font-sans text-sm text-red-200"
+                >
+                  {erroGeral}
+                </p>
+              )}
+            </div>
 
-            <button
-              type="submit"
-              disabled={enviando}
-              className="mt-6 flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-full bg-sage px-8 py-4 font-sans font-medium text-carbon transition-colors hover:bg-limestone disabled:cursor-wait disabled:opacity-60"
-            >
-              {enviando ? null : <IconeAviao />}
-              {enviando ? "Enviando…" : "Enviar mensagem"}
-            </button>
+            {/* Rodapé: FORA da área que rola, então o botão está sempre à vista —
+                era a reclamação original (ele ficava cortado ou inalcançável).
+                O `env(safe-area-inset-bottom)` reserva a barra flutuante do
+                Safari e o indicador de home; `max()` garante o padding mínimo
+                onde não há safe area. */}
+            <div className="shrink-0 border-t border-limestone/10 px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4 md:px-8 md:pb-8">
+              <button
+                type="submit"
+                disabled={enviando}
+                className="flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-full bg-sage px-8 py-4 font-sans font-medium text-carbon transition-colors hover:bg-limestone disabled:cursor-wait disabled:opacity-60"
+              >
+                {enviando ? null : <IconeAviao />}
+                {enviando ? "Enviando…" : "Enviar mensagem"}
+              </button>
+            </div>
           </form>
         )}
       </div>

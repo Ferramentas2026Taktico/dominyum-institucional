@@ -133,10 +133,84 @@ o `POST /api/contato`. Decisões que custaram análise — não desfazer sem mot
 9. **Sem SDK `resend` e sem `zod`.** É um POST só, para o mesmo endpoint que o SDK
    chama por dentro; e a validação de 5 campos à mão custa menos que a
    dependência. Mesma escolha do Prism, que foi portado em vez de instalado.
-10. **Honeypot preenchido devolve 200 de mentira.** Dizer "recusado" ensinaria o
+10. **`display` no `<dialog>` tem de ser `open:`-gated.** `open:flex`, nunca `flex`
+    solto. O navegador esconde diálogo fechado com
+    `dialog:not([open]) { display: none }`, e **regra de autor vence regra de UA** —
+    um `display: flex` cru mantém o diálogo FECHADO renderizado, e o formulário
+    aparece dentro da seção Contato sem ninguém clicar. Chegou a produção assim.
+    Sintoma gêmeo: fechado ele não é `:modal`, logo não ganha `position: fixed` nem
+    `inset-block: 0`, cai no fluxo e parece "não centralizado" — mesma causa, outra
+    aparência.
+11. **`sm:h-fit`, nunca `sm:h-auto`, no diálogo centralizado.** O UA põe
+    `inset-block: 0 0` no `dialog:modal`, e em posicionamento fixo com as duas
+    bordas presas `height: auto` **estica para preencher** — sem espaço sobrando o
+    `margin: auto` não tem o que distribuir e o card vira tela cheia, sem
+    centralizar. `fit-content` é o que o próprio UA usa. Medido: com `auto`, 900px
+    de altura numa viewport de 900; com `fit`, 641px e folga de 130 igual em cima e
+    embaixo.
+12. **O teto de altura mora no `<dialog>`, NUNCA no painel** — e é `dvh`.
+    A primeira versão punha `max-h-[88dvh]` no painel e deixava o diálogo com o
+    `max-height` do UA, medido contra o *initial containing block* (a viewport
+    GRANDE no iOS): duas restrições em referenciais diferentes, e no celular real o
+    painel passava da tela e o botão de enviar sumia. **A culpa era da divisão, não
+    da unidade** — e a primeira correção errou o alvo trocando para `svh`, que
+    reserva espaço para TODO o chrome (inclusive a barra inferior que pode não estar
+    aparecendo) e deixava uma folga morta embaixo da sheet. `dvh` é a viewport
+    visível atual, que é o que uma sheet quer.
+13. **`min-h-0` no miolo que rola é obrigatório.** Item flex não encolhe abaixo do
+    próprio conteúdo sem ele, e aí o `overflow-y-auto` nunca ativa — o conserto
+    parece simplesmente não funcionar. Medido: o miolo encolhe de 479 para 195px
+    conforme a tela encurta, com o conteúdo fixo em 538.
+14. **O botão de enviar vive num rodapé FORA da área que rola**, com
+    `env(safe-area-inset-bottom)`. Abaixo de `sm` a modal é uma sheet que ocupa a
+    tela visível inteira; card centralizado sempre briga com tela curta.
+    **Efeito colateral que vale saber:** com Nome e Telefone empilhados no mobile
+    (uma coluna), o formulário mede 538px contra 479 disponíveis no Safari — ou
+    seja, ele rola por dentro em QUALQUER altura de celular, não só em tela curta,
+    e o aceite de LGPD fica abaixo da dobra sempre. **Não conte com o foco no
+    primeiro campo com erro para trazer o aceite** — esta linha já afirmou isso e
+    estava errada: `Object.keys(erros)[0]` segue a ordem de inserção de
+    `validaContato`, então no caso comum (formulário vazio) o primeiro erro é `nome`
+    e o foco vai para o TOPO, com `scrollTop` em 0. O medido `0 → 95` vinha de um
+    teste que preenchia tudo menos o aceite, onde o primeiro erro *era* o aceite.
+    Quem sustenta a usabilidade é a rolagem funcionar de fato — ver item 16, que é
+    de onde vinha a impressão de que o checkbox "desaparecia". Já se cogitou pôr os
+    dois campos na mesma linha
+    para caber; devolve 94px e faz caber em 664, mas foi revertido por preferência
+    visual. Encolher o textarea não é alternativa: corta só ~24px e continua
+    rolando.
+15. **Honeypot preenchido devolve 200 de mentira.** Dizer "recusado" ensinaria o
     bot a tentar de outro jeito. Nos demais erros vale o oposto — motivo
     explícito, por campo: ali do outro lado pode ter gente, e sumir com a
     mensagem dela em silêncio seria pior que um falso positivo declarado.
+16. **`data-lenis-prevent` no miolo que rola — sem ele o dedo não rola nada.**
+    `lenis.stop()` (item 4) faz o Lenis dar `preventDefault()` em TODO
+    `touchmove`/`wheel` que chega na window, e o listener é `passive: false` na
+    window — então ele mata também o gesto que nasce DENTRO do `<dialog>`
+    (`lenis.mjs`, o ramo `if (this.isStopped || this.isLocked)`). A área rolável
+    existia e estava correta; o gesto morria antes de chegar nela, e o aceite de
+    LGPD ficava inalcançável no celular. Chegou a produção assim. O Lenis testa
+    esse atributo ANTES do preventDefault, e por ancestralidade ele também devolve
+    a rolagem de dentro do `<textarea>`. Sem sufixo (`-touch`/`-wheel`): a roda do
+    mouse no desktop morria igual.
+    **Quem trava a página atrás não é o `overscroll-contain`** — é o `lenis.css`,
+    com `.lenis.lenis-stopped { overflow: clip }` no `<html>`. Medido: forçando
+    `overscroll-behavior: auto` em runtime a página segue imóvel, e o `overflow` do
+    `<html>` vai de `visible` a `clip` e volta ao fechar. O `overscroll-contain`
+    fica como reforço (o próprio `lenis.css` já o aplica a `[data-lenis-prevent]`).
+17. **Rolagem só se verifica com GESTO.** `elemento.scrollTop = N` e `campo.focus()`
+    são programáticos e passam por cima do `preventDefault` — foi assim que 11
+    testes ficaram verdes com o formulário inutilizável no celular. Pior: o
+    `modal.mjs` dava uma roda no centro da tela e declarava "fundo travado" quando
+    a página não se movia; a página não se movia PORQUE o gesto morria. Era o
+    sintoma do bug lido como sucesso. Hoje ele exige as duas coisas no mesmo gesto
+    (página parada **e** miolo rolando). E cuidado com o harness:
+    `Input.synthesizeScrollGesture` entrega **zero** `touchmove` neste headless —
+    um teste que não dispara evento nenhum "passa" pelo motivo errado. O que
+    funciona é `Input.dispatchTouchEvent` montando o arrasto à mão; e a medida mais
+    direta não é o `scrollTop`, é o `touchmove` sair da window **cancelado** ou não
+    (com o par cabeçalho/miolo no mesmo run, um cancelado e outro livre, a asserção
+    se prova capaz de falhar sem reverter o código).
 
 ## Antispam do formulário (modelo de ameaça)
 
@@ -198,6 +272,11 @@ verdade para de chegar**. Por isso as defesas aqui limitam VOLUME; identificar b
   maiores. Ex.: `text-4xl md:text-7xl`, `py-20 md:py-32`.
 - Seções de conteúdo usam `py-20 md:py-32`. Hero e Contato usam `min-h-screen`
   (não têm `py-32`).
+- **Medir em altura VISÍVEL, nunca na altura física do aparelho.** Um iPhone 14
+  tem 844px de tela, mas o Safari entrega ~664 e o Chrome ~628 — o resto é barra
+  do navegador; com o teclado aberto sobram ~380. Emular 390×844 é testar uma
+  viewport que navegador nenhum oferece, e foi assim que a modal de contato passou
+  na verificação e chegou quebrada no celular de verdade.
 - Navbar: menu hambúrguer + overlay abaixo de `md`.
 - **Nenhuma seção tem mais efeito preso a ponteiro fino.** O Contato tinha
   holofote que seguia o cursor e botão magnético (`(hover:hover)/(pointer:fine)`);
@@ -221,6 +300,35 @@ verdade para de chegar**. Por isso as defesas aqui limitam VOLUME; identificar b
 - **No menu mobile, chamar `lenis.start()` ANTES do `scrollTo`.** Ao abrir o
   menu chamamos `lenis.stop()` (trava o fundo); um Lenis parado tem o loop
   suspenso e ignora o `scrollTo`. Religar explicitamente no mesmo clique resolve.
+- **Erro de hidratação que só aparece num navegador de celular: suspeitar do
+  aplicativo, não do nosso render.** Sintoma real: "some attributes of the server
+  rendered HTML didn't match", **no load**, **só no Chrome do iPhone e não no
+  Safari**, persistindo em aba anônima. No iOS os dois são o MESMO motor (WebKit) —
+  motor igual com comportamento diferente só pode vir do app. Os *data detectors*
+  (que envolvem texto em `<a>` antes do React hidratar) são configurados por
+  aplicativo no `WKWebView`, e aba anônima descarta extensão (o Chrome do iOS não
+  tem). Daí o `formatDetection` no `layout.tsx`. Antes de chegar aqui, foi
+  verificado que **nada no nosso render depende de ambiente**: todo
+  `window.`/`matchMedia`/`Math.random`/`Date.` do `src/` está dentro de efeito ou
+  handler, e o `useMovimentoReduzido` tem `getServerSnapshot` (medido: com
+  `prefers-reduced-motion: reduce` emulado não há descasamento). **Não reproduz em
+  Chrome headless** em nenhuma combinação — UA de iPhone, 3G + CPU 6×, toque antes
+  da hidratação, IP da LAN. Duas hipótese minhas morreram no caminho e ficam
+  registradas para ninguém repetir: (a) a corrida "toque antes de hidratar" — medido,
+  o toque pré-hidratação é **perdido**, não reexecutado, e não gera descasamento;
+  (b) `prefers-reduced-motion`.
+- **`allowedDevOrigins` mora no default export do `next.config.ts`.** Ter um
+  `module.exports = {...}` ao lado do `export default` deixa a lista MORTA — o Next
+  lê o default. Dois mecanismos de export no mesmo arquivo é erro que não dá erro.
+  E o casamento é por segmento, então `192.168.67.*` sobrevive ao DHCP trocar o
+  último octeto (provado: `192.168.67.9` passa, `192.168.99.9` toma 403).
+- **Qualquer área rolável dentro de algo que chama `lenis.stop()` precisa de
+  `data-lenis-prevent`.** Vale para modal, overlay, drawer — não é específico do
+  formulário. O Lenis parado cancela `touchmove`/`wheel` na window inteira, e sem o
+  atributo a área rola no papel e não rola no dedo. Detalhes e medições no item 16
+  do formulário de contato. Hoje o overlay do menu mobile não tem container de
+  rolagem, então não é afetado; se um dia o menu passar da altura da tela, é aqui
+  que a resposta está.
 - **Transform e blocos:** ao animar `scale`/`x`/`y` no GSAP, não deixar a
   centralização/rotação do elemento também no transform via classe — separar
   (ex.: rotação em `style` inline, centralização por `inset-0 m-auto`).
